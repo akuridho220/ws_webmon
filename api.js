@@ -1,28 +1,30 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const client = require('./connection');
 const app = express();
 
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+
+app.use(cors());
 
 app.listen(3100, () => {
-    console.log('Server running on port 3100');
-})
+  console.log('Server running on port 3100');
+});
 
-client.connect(err => {
-    if(err){
-        console.log(err.message)
-    } else {
-        console.log('Connected')
-    }
-})
-
+client.connect((err) => {
+  if (err) {
+    console.log(err.message);
+  } else {
+    console.log('Connected');
+  }
+});
 
 // Endpoint here
 app.get('/tes', (req, res) => {
-    client.query(
-        `
+  client.query(
+    `
         SELECT
             rumahtangga.no_bs AS kode_bs,
             MIN(posisi_pcl.nim) AS nim,
@@ -37,11 +39,13 @@ app.get('/tes', (req, res) => {
             rumahtangga.no_bs
         ORDER BY
             rumahtangga.no_bs DESC
-        `, (err, result) => {
-        if(!err){
-            res.send(result.rows)
-        } else {
-            console.log(err.message)
-        }
-    })
-})
+        `,
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
