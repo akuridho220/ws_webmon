@@ -51,6 +51,23 @@ app.get('/tes', (req, res) => {
 });
 
 // ENDPOINT FOR DASHBOARD
+app.get('/api/dashboard/total-listing', (req, res) => {
+  client.query(
+    `
+        SELECT
+            COUNT(*) AS total_listing
+        FROM
+            rumahtangga
+        `,
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows[0]);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
 
 // ENDPOINT FOR RISET
 // Daftar Listing
