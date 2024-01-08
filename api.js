@@ -294,10 +294,74 @@ app.get('/api/riset/daftar/sampel/desa', (req, res) => {
 
 // Daftar Pertim
 // Listing
-
+app.get('/api/riset/daftar/tim/listing', (req, res) => {
+    client.query(
+        `
+        SELECT
+            rumahtangga.no_bs AS kode_bs,
+            posisi_pcl.nim AS nim,
+            mahasiswa.nama AS nama,
+            COUNT(*) as jumlah_listing
+        FROM
+            rumahtangga
+        LEFT JOIN
+            bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
+        LEFT JOIN
+            posisi_pcl ON posisi_pcl.nim = bloksensus.nim_pencacah
+        LEFT JOIN
+            mahasiswa ON posisi_pcl.nim = mahasiswa.nim
+        GROUP BY
+            rumahtangga.no_bs,
+            posisi_pcl.nim,
+            mahasiswa.nama
+        ORDER BY
+            jumlah_listing DESC
+        `,
+        (err, result) => {
+            if (!err) {
+                res.send(result.rows);
+            } else {
+                console.log(err.message);
+            }
+        }
+    );
+});
 
 // Sampel
-
+app.get('/api/riset/daftar/tim/sampel', (req, res) => {
+    client.query(
+        `
+        SELECT
+            rumahtangga.no_bs AS kode_bs,
+            posisi_pcl.nim AS nim,
+            mahasiswa.nama AS nama,
+            COUNT(*) as jumlah_sampel
+        FROM
+            datast
+        LEFT JOIN
+            rumahtangga ON rumahtangga.kode_ruta = datast.kode_ruta
+        LEFT JOIN
+            bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
+        LEFT JOIN
+            posisi_pcl ON posisi_pcl.nim = bloksensus.nim_pencacah
+        LEFT JOIN
+            mahasiswa ON posisi_pcl.nim = mahasiswa.nim
+        GROUP BY
+            rumahtangga.no_bs,
+            posisi_pcl.nim,
+            mahasiswa.nama
+        ORDER BY
+            jumlah_sampel DESC
+        `,
+        (err, result) => {
+            if (!err) {
+                res.send(result.rows);
+            } else {
+                console.log(err.message);
+            }
+        }
+    );
+});
 
 
 // Endpoint for Monitoring PCL
