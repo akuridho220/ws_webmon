@@ -114,5 +114,33 @@ app.get('/api/riset/daftar/listing/kec', (req, res) => {
 
 
 // Endpoint for Monitoring PCL
+app.get('/api/monitoring-pcl', (req, res) => {
+    client.query(
+        `
+        SELECT 
+            posisi_pcl.nim AS nim,
+            posisi_pcl.lokus AS lokus,
+            posisi_pcl.latitude AS lat,
+            posisi_pcl.longitude AS long,
+            posisi_pcl.akurasi AS akurasi,
+            posisi_pcl.time_created AS time_created,
+            mahasiswa.nama AS nama,
+            mahasiswa.id_tim as id_tim,
+            mahasiswa.no_hp as no_hp
+        FROM 
+            posisi_pcl
+        LEFT JOIN mahasiswa ON posisi_pcl.nim = mahasiswa.nim
+        WHERE latitude IS NOT NULL
+        ORDER BY nama ASC
+        `,
+        (err, result) => {
+            if (!err) {
+                res.send(result.rows);
+            } else {
+                console.log(err.message);
+            }
+        }
+    );
+});
 
 // Endpoint for Profile
