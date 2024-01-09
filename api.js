@@ -301,6 +301,7 @@ app.get('/api/riset/daftar/tim/listing', (req, res) => {
             rumahtangga.no_bs AS kode_bs,
             posisi_pcl.nim AS nim,
             mahasiswa.nama AS nama,
+			mahasiswa.id_tim AS id_tim,
             COUNT(*) as jumlah_listing
         FROM
             rumahtangga
@@ -313,7 +314,8 @@ app.get('/api/riset/daftar/tim/listing', (req, res) => {
         GROUP BY
             rumahtangga.no_bs,
             posisi_pcl.nim,
-            mahasiswa.nama
+            mahasiswa.nama,
+			mahasiswa.id_tim
         ORDER BY
             jumlah_listing DESC
         `,
@@ -335,6 +337,7 @@ app.get('/api/riset/daftar/tim/sampel', (req, res) => {
             rumahtangga.no_bs AS kode_bs,
             posisi_pcl.nim AS nim,
             mahasiswa.nama AS nama,
+            mahasiswa.id_tim AS id_tim,
             COUNT(*) as jumlah_sampel
         FROM
             datast
@@ -349,7 +352,8 @@ app.get('/api/riset/daftar/tim/sampel', (req, res) => {
         GROUP BY
             rumahtangga.no_bs,
             posisi_pcl.nim,
-            mahasiswa.nama
+            mahasiswa.nama,
+            mahasiswa.id_tim
         ORDER BY
             jumlah_sampel DESC
         `,
@@ -362,6 +366,34 @@ app.get('/api/riset/daftar/tim/sampel', (req, res) => {
         }
     );
 });
+
+// - list tim
+app.get('/api/riset/daftar/tim/list-tim', (req, res) => {
+    client.query(
+        `
+        SELECT
+            mahasiswa.id_tim AS id_tim,
+            lokus
+        FROM
+            posisi_pcl
+        LEFT JOIN
+            mahasiswa ON posisi_pcl.nim = mahasiswa.nim
+        GROUP BY
+            mahasiswa.id_tim,
+            lokus
+        ORDER BY
+            id_tim ASC
+        `,
+        (err, result) => {
+            if (!err) {
+                res.send(result.rows);
+            } else {
+                console.log(err.message);
+            }
+        }
+    );
+});
+
 
 
 // Endpoint for Monitoring PCL
