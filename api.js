@@ -1,16 +1,19 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
-const client = require('./connection');
+const { client } = require('./connection');
 const app = express();
+const port = process.env.PORT;
+const jwt = require('jsonwebtoken');
 
 app.use(bodyParser.json());
 
 app.use(cors());
 
-app.listen(3100, () => {
-  console.log('Server running on port 3100');
+app.listen(port, () => {
+  console.log(`Server running on ${port}`);
 });
 
 client.connect((err) => {
@@ -21,9 +24,25 @@ client.connect((err) => {
   }
 });
 
+function validateToken(req, res, next) {
+  //get token from request header
+  const authHeader = req.headers['authorization'];
+  const token = authHeader.split(' ')[1];
+  //the request header contains the token "Bearer <token>", split the string and use the second value in the split array.
+  if (token == null) res.sendStatus(400).send('Token not present');
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) {
+      res.status(403).send('Token invalid');
+    } else {
+      req.user = user;
+      next(); //proceed to the next action in the calling function
+    }
+  }); //end of jwt.verify()
+}
+
 // Endpoint here
 // ENDPOINT FOR DASHBOARD
-app.get('/api/dashboard/total-listing', (req, res) => {
+app.get('/api/dashboard/total-listing', validateToken, (req, res) => {
   client.query(
     `
         SELECT
@@ -44,7 +63,7 @@ app.get('/api/dashboard/total-listing', (req, res) => {
 // ENDPOINT FOR RISET
 // Daftar Listing
 // - bloksensus
-app.get('/api/riset/daftar/listing/bs', (req, res) => {
+app.get('/api/riset/daftar/listing/bs', validateToken, (req, res) => {
   client.query(
     `
         SELECT
@@ -73,7 +92,7 @@ app.get('/api/riset/daftar/listing/bs', (req, res) => {
 });
 
 // - desa/kelurahan
-app.get('/api/riset/daftar/listing/desa', (req, res) => {
+app.get('/api/riset/daftar/listing/desa', validateToken, (req, res) => {
   client.query(
     `
         SELECT
@@ -100,7 +119,7 @@ app.get('/api/riset/daftar/listing/desa', (req, res) => {
   );
 });
 // - kacamatan
-app.get('/api/riset/daftar/listing/kec', (req, res) => {
+app.get('/api/riset/daftar/listing/kec', validateToken, (req, res) => {
   client.query(
     `
         SELECT
@@ -128,7 +147,7 @@ app.get('/api/riset/daftar/listing/kec', (req, res) => {
 });
 
 // - kabupaten kota
-app.get('/api/riset/daftar/listing/kab', (req, res) => {
+app.get('/api/riset/daftar/listing/kab', validateToken, (req, res) => {
   client.query(
     `
         SELECT
@@ -162,12 +181,11 @@ app.get('/api/riset/daftar/listing/kab', (req, res) => {
 // - kecamatan
 // - kabupaten
 
-
 // Daftar Sampel
 // - bloksensus
-app.get('/api/riset/daftar/sampel/bs', (req, res) => {
-    client.query(
-        `
+app.get('/api/riset/daftar/sampel/bs', validateToken, (req, res) => {
+  client.query(
+    `
         SELECT
             datast.no_bs AS kode_bs,
             MIN(datast.kode_ruta) AS kode_ruta,
@@ -185,20 +203,20 @@ app.get('/api/riset/daftar/sampel/bs', (req, res) => {
         ORDER BY
             kode_bs DESC
         `,
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
 
 // - kecamatan
-app.get('/api/riset/daftar/sampel/kec', (req, res) => {
-    client.query(
-        `
+app.get('/api/riset/daftar/sampel/kec', validateToken, (req, res) => {
+  client.query(
+    `
         SELECT
             MIN(datast.no_bs) AS kode_bs,
             kecamatan.id_kec AS kode_kecamatan,
@@ -217,20 +235,20 @@ app.get('/api/riset/daftar/sampel/kec', (req, res) => {
         ORDER BY
             kecamatan.id_kec DESC
         `,
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
 
 // - kabupaten
-app.get('/api/riset/daftar/sampel/kab', (req, res) => {
-    client.query(
-        `
+app.get('/api/riset/daftar/sampel/kab', validateToken, (req, res) => {
+  client.query(
+    `
         SELECT
             MIN(datast.no_bs) AS kode_bs,
             kabupaten.id_kab AS kode_kabupaten,
@@ -249,20 +267,20 @@ app.get('/api/riset/daftar/sampel/kab', (req, res) => {
         ORDER BY
             kabupaten.id_kab DESC
         `,
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
 
 // - desa / kelurahan
-app.get('/api/riset/daftar/sampel/desa', (req, res) => {
-    client.query(
-        `
+app.get('/api/riset/daftar/sampel/desa', validateToken, (req, res) => {
+  client.query(
+    `
         SELECT
             MIN(datast.no_bs) AS kode_bs,
             kelurahan.id_kelurahan AS kode_kelurahan,
@@ -281,22 +299,21 @@ app.get('/api/riset/daftar/sampel/desa', (req, res) => {
         ORDER BY
             kelurahan.id_kelurahan DESC
         `,
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
-
 
 // Daftar Pertim
 // Listing
-app.get('/api/riset/daftar/tim/listing', (req, res) => {
-    client.query(
-        `
+app.get('/api/riset/daftar/tim/listing', validateToken, (req, res) => {
+  client.query(
+    `
         SELECT
             rumahtangga.no_bs AS kode_bs,
             posisi_pcl.nim AS nim,
@@ -319,20 +336,20 @@ app.get('/api/riset/daftar/tim/listing', (req, res) => {
         ORDER BY
             jumlah_listing DESC
         `,
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
 
 // Sampel
-app.get('/api/riset/daftar/tim/sampel', (req, res) => {
-    client.query(
-        `
+app.get('/api/riset/daftar/tim/sampel', validateToken, (req, res) => {
+  client.query(
+    `
         SELECT
             rumahtangga.no_bs AS kode_bs,
             posisi_pcl.nim AS nim,
@@ -357,20 +374,20 @@ app.get('/api/riset/daftar/tim/sampel', (req, res) => {
         ORDER BY
             jumlah_sampel DESC
         `,
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
 
 // - list tim
-app.get('/api/riset/daftar/tim/list-tim', (req, res) => {
-    client.query(
-        `
+app.get('/api/riset/daftar/tim/list-tim', validateToken, (req, res) => {
+  client.query(
+    `
         SELECT
             mahasiswa.id_tim AS id_tim,
             lokus
@@ -384,22 +401,20 @@ app.get('/api/riset/daftar/tim/list-tim', (req, res) => {
         ORDER BY
             id_tim ASC
         `,
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
 
-
-
 // Endpoint for Monitoring PCL
-app.get('/api/monitoring-pcl', (req, res) => {
-    client.query(
-        `
+app.get('/api/monitoring-pcl', validateToken, (req, res) => {
+  client.query(
+    `
         SELECT 
             posisi_pcl.nim AS nim,
             posisi_pcl.lokus AS lokus,
@@ -416,14 +431,14 @@ app.get('/api/monitoring-pcl', (req, res) => {
         WHERE latitude IS NOT NULL
         ORDER BY nama ASC
         `,
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
 
 // Endpoint for Profile
