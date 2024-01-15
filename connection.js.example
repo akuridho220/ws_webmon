@@ -8,4 +8,12 @@ const client = new Client({
     database: '(NAMA DATABASE)'
 })
 
-module.exports = client;
+const authClient = new Client({
+  host: 'localhost',
+  user: 'postgres',
+  password: '(GANTI PASSWORD KALIAN)',
+  port: 5432,
+  database: '(NAMA DATABASE_KHUSUS WEBMON)',
+});
+
+module.exports = { client, authClient };
