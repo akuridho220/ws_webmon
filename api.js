@@ -291,7 +291,6 @@ app.get('/api/riset/daftar/sampel/desa', (req, res) => {
     );
 });
 
-
 // Daftar Pertim
 // Listing
 app.get('/api/riset/daftar/tim/listing', (req, res) => {
@@ -394,6 +393,64 @@ app.get('/api/riset/daftar/tim/list-tim', (req, res) => {
     );
 });
 
+// - pml by tim
+app.get('/api/riset/daftar/tim/pmlbytim/:id_tim', (req, res) => {
+    const id_tim = req.params.id_tim;
+    client.query(
+        `
+        SELECT
+            timpencacah.*,
+            posisi_pcl.*,
+            mahasiswa.nama AS nama,
+            mahasiswa.foto
+        FROM
+            timpencacah
+        LEFT JOIN
+            posisi_pcl ON posisi_pcl.nim = timpencacah.nim_pml
+        LEFT JOIN
+            mahasiswa ON mahasiswa.nim = timpencacah.nim_pml
+        WHERE
+            timpencacah.id_tim = $1
+        `,[id_tim],
+        (err, result) => {
+            if (!err) {
+                res.send(result.rows);
+            } else {
+                console.log(err.message);
+            }
+        }
+    );
+});
+
+// - ppl by tim
+app.get('/api/riset/daftar/tim/pplbytim/:id_tim', (req, res) => {
+    const id_tim = req.params.id_tim;
+    client.query(
+        `
+        SELECT
+            timpencacah.*,
+            posisi_pcl.*,
+            mahasiswa.nama AS nama,
+            mahasiswa.foto
+        FROM
+            posisi_pcl
+        LEFT JOIN
+            timpencacah ON timpencacah.nim_pml = posisi_pcl.nim
+        LEFT JOIN
+            mahasiswa ON mahasiswa.nim = posisi_pcl.nim
+        WHERE
+            mahasiswa.id_tim = $1
+            AND timpencacah.nama_tim IS NULL
+        `,[id_tim],
+        (err, result) => {
+            if (!err) {
+                res.send(result.rows);
+            } else {
+                console.log(err.message);
+            }
+        }
+    );
+});
 
 
 // Endpoint for Monitoring PCL
