@@ -16,7 +16,7 @@ npm install
 node generate.js
 ```
 
-    untuk mengambil accesTokenSecret dan RefreshTokenSecret untuk dicopykan ke .env
+untuk mengambil accesTokenSecret dan RefreshTokenSecret untuk dicopykan ke .env
 
 7. run
 
@@ -24,7 +24,7 @@ node generate.js
 node api.js'
 ```
 
-    atau
+atau
 
 ```
 'nodemon api.js
@@ -33,11 +33,17 @@ node api.js'
 8. buka terminal lain run
 
 ```
-'node authServer.js'
+node authServer.js
+```
+    
+atau
+
+```
+nodemon authServer.js
 ```
 
-    atau
+Dokumentasi dan workspace public api (Postman)
 
-```
-'nodemon authServer.js'
-```
+- [Dokumentasi]()
+- [Workspace](https://www.postman.com/material-operator-32822973/workspace/webmon/collection/27677435-e6ef9964-e056-4b8b-849e-de22deb645a3?action=share&creator=27677435&active-environment=27677435-399f76cd-e6c5-4489-8990-b9ca81a66831)
+
