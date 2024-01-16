@@ -21,13 +21,13 @@ untuk mengambil accesTokenSecret dan RefreshTokenSecret untuk dicopykan ke .env
 7. run
 
 ```
-node api.js'
+node api.js
 ```
 
 atau
 
 ```
-'nodemon api.js
+nodemon api.js
 ```
 
 8. buka terminal lain run
@@ -42,8 +42,8 @@ atau
 nodemon authServer.js
 ```
 
-# Dokumentasi dan workspace public api (Postman)
+# Dokumentasi API
 
 - ## [Dokumentasi](https://documenter.getpostman.com/view/27677435/2s9YsQ6p72)
-- ## [Workspace](https://www.postman.com/material-operator-32822973/workspace/webmon/collection/27677435-e6ef9964-e056-4b8b-849e-de22deb645a3?action=share&creator=27677435&active-environment=27677435-399f76cd-e6c5-4489-8990-b9ca81a66831)
+active-environment=27677435-399f76cd-e6c5-4489-8990-b9ca81a66831)
 
