@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
-const { client } = require('./connection');
+const { client, authClient } = require('./connection');
 const app = express();
 const port = process.env.PORT;
 const jwt = require('jsonwebtoken');
@@ -175,6 +175,7 @@ app.get('/api/riset/daftar/listing/kab', validateToken, (req, res) => {
 });
 
 // - keseluruhan
+
 //Detail Listing
 // - bloksensus
 // - desa
@@ -413,9 +414,9 @@ app.get('/api/riset/daftar/tim/list-tim', validateToken, (req, res) => {
 
 // - pml by tim
 app.get('/api/riset/daftar/tim/pmlbytim/:id_tim', (req, res) => {
-    const id_tim = req.params.id_tim;
-    client.query(
-        `
+  const id_tim = req.params.id_tim;
+  client.query(
+    `
         SELECT
             timpencacah.*,
             posisi_pcl.*,
@@ -429,22 +430,23 @@ app.get('/api/riset/daftar/tim/pmlbytim/:id_tim', (req, res) => {
             mahasiswa ON mahasiswa.nim = timpencacah.nim_pml
         WHERE
             timpencacah.id_tim = $1
-        `,[id_tim],
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+        `,
+    [id_tim],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
 
 // - ppl by tim
 app.get('/api/riset/daftar/tim/pplbytim/:id_tim', (req, res) => {
-    const id_tim = req.params.id_tim;
-    client.query(
-        `
+  const id_tim = req.params.id_tim;
+  client.query(
+    `
         SELECT
             timpencacah.*,
             posisi_pcl.*,
@@ -459,17 +461,17 @@ app.get('/api/riset/daftar/tim/pplbytim/:id_tim', (req, res) => {
         WHERE
             mahasiswa.id_tim = $1
             AND timpencacah.nama_tim IS NULL
-        `,[id_tim],
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+        `,
+    [id_tim],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
-
 
 // Endpoint for Monitoring PCL
 app.get('/api/monitoring-pcl', validateToken, (req, res) => {
@@ -502,3 +504,7 @@ app.get('/api/monitoring-pcl', validateToken, (req, res) => {
 });
 
 // Endpoint for Profile
+app.get('/api/profile', validateToken, (req, res) => {
+  user = req.user.user;
+  res.json(user);
+});

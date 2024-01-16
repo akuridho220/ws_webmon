@@ -21,7 +21,7 @@ authClient.connect((err) => {
 });
 
 // REGISTER A USER
-app.post('/createUser', async (req, res) => {
+app.post('/api/createUser', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const query = 'INSERT INTO users (name, password, email, jenis, jabatan) VALUES ($1, $2, $3, $4, $5)';
@@ -35,7 +35,7 @@ app.post('/createUser', async (req, res) => {
 });
 
 // AUTHENTICATE LOGIN AND RETURN JWT TOKEN
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
   try {
     const query = 'SELECT * FROM users WHERE email = $1';
     const result = await authClient.query(query, [req.body.email]);
@@ -46,8 +46,8 @@ app.post('/login', async (req, res) => {
     }
 
     if (await bcrypt.compare(req.body.password, user.password)) {
-      const accessToken = generateAccessToken({ user: req.body.name });
-      const refreshToken = generateRefreshToken({ user: req.body.name });
+      const accessToken = generateAccessToken({ user: user });
+      const refreshToken = generateRefreshToken({ user: user });
       res.json({ accessToken, refreshToken });
     } else {
       res.status(401).send('Password Incorrect!');
@@ -60,6 +60,7 @@ app.post('/login', async (req, res) => {
 
 // Access Token
 function generateAccessToken(user) {
+  console.log(user);
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 }
 
@@ -73,7 +74,7 @@ function generateRefreshToken(user) {
 }
 
 // REFRESH TOKEN API
-app.post('/refreshToken', (req, res) => {
+app.post('/api/refreshToken', (req, res) => {
   if (!refreshTokens.includes(req.body.token)) res.status(400).send('Refresh Token Invalid');
   refreshTokens = refreshTokens.filter((c) => c != req.body.token);
   const accessToken = generateAccessToken({ user: req.body.name });
@@ -81,7 +82,7 @@ app.post('/refreshToken', (req, res) => {
   res.json({ accessToken, refreshToken });
 });
 
-app.delete('/logout', (req, res) => {
+app.delete('/api/logout', (req, res) => {
   const tokenToInvalidate = req.body.token;
   if (!tokenToInvalidate) {
     return res.status(400).send('Token not provided');
