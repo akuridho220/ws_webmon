@@ -1,6 +1,7 @@
 # Cara Menjalankan Web Service:
 
-1. Masuk terminal lalu run 
+1. Masuk terminal lalu run
+
 ```
 git clone https://git.stis.ac.id/fosil-spd-pkl/63/web-service-webmon.git
 ```
@@ -37,19 +38,6 @@ atau
 nodemon api.js
 ```
 
-8. buka terminal lain run
-
-```
-node authServer.js
-```
-    
-atau
-
-```
-nodemon authServer.js
-```
-
 # Dokumentasi API
 
 - ## [Dokumentasi](https://documenter.getpostman.com/view/27677435/2s9YsQ6p72)
-

@@ -3,7 +3,9 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = express();
+const cors = require('cors');
 app.use(express.json());
+app.use(cors());
 
 const port = process.env.TOKEN_SERVER_PORT;
 const { authClient } = require('./connection');
@@ -34,6 +36,13 @@ app.post('/api/createUser', async (req, res) => {
   }
 });
 
+// Declare an array to store active access tokens
+
+const activeAccessTokens = [];
+module.exports = {
+  activeAccessTokens,
+};
+
 // AUTHENTICATE LOGIN AND RETURN JWT TOKEN
 app.post('/api/login', async (req, res) => {
   try {
@@ -42,15 +51,15 @@ app.post('/api/login', async (req, res) => {
     const user = result.rows[0];
 
     if (!user) {
-      return res.status(404).send('User does not exist!');
+      return res.status(404).send('User tidak terdaftar dalam database');
     }
 
     if (await bcrypt.compare(req.body.password, user.password)) {
       const accessToken = generateAccessToken({ user: user });
-      const refreshToken = generateRefreshToken({ user: user });
-      res.json({ accessToken, refreshToken });
+      activeAccessTokens.push(accessToken);
+      res.json({ accessToken });
     } else {
-      res.status(401).send('Password Incorrect!');
+      res.status(401).send('Password tidak sesuai!');
     }
   } catch (error) {
     console.error(error);
@@ -61,32 +70,21 @@ app.post('/api/login', async (req, res) => {
 // Access Token
 function generateAccessToken(user) {
   console.log(user);
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
 }
-
-// Refresh Token
-let refreshTokens = [];
-
-function generateRefreshToken(user) {
-  const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '20m' });
-  refreshTokens.push(refreshToken);
-  return refreshToken;
-}
-
-// REFRESH TOKEN API
-app.post('/api/refreshToken', (req, res) => {
-  if (!refreshTokens.includes(req.body.token)) res.status(400).send('Refresh Token Invalid');
-  refreshTokens = refreshTokens.filter((c) => c != req.body.token);
-  const accessToken = generateAccessToken({ user: req.body.name });
-  const refreshToken = generateRefreshToken({ user: req.body.name });
-  res.json({ accessToken, refreshToken });
-});
 
 app.delete('/api/logout', (req, res) => {
   const tokenToInvalidate = req.body.token;
   if (!tokenToInvalidate) {
     return res.status(400).send('Token not provided');
   }
-  refreshTokens = refreshTokens.filter((c) => c != tokenToInvalidate);
-  res.status(202).send('Logged out!');
+  // Validate and remove the token from the list
+  const index = activeAccessTokens.indexOf(tokenToInvalidate);
+
+  if (index !== -1) {
+    activeAccessTokens.splice(index, 1);
+    res.status(202).send('Logged out!');
+  } else {
+    res.status(401).send('Invalid token');
+  }
 });
