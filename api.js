@@ -1,9 +1,10 @@
 require('dotenv').config();
+const { activeAccessTokens } = require('./authServer');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
-const { client } = require('./connection');
+const { client, authClient } = require('./connection');
 const app = express();
 const port = process.env.PORT;
 const jwt = require('jsonwebtoken');
@@ -30,6 +31,12 @@ function validateToken(req, res, next) {
   const token = authHeader.split(' ')[1];
   //the request header contains the token "Bearer <token>", split the string and use the second value in the split array.
   if (token == null) res.sendStatus(400).send('Token not present');
+  // Check if the token is in the list of active tokens
+  console.log(activeAccessTokens);
+  if (!activeAccessTokens.includes(token)) {
+    return res.status(403).send('Token not active');
+  }
+
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) {
       res.status(403).send('Token invalid');
@@ -843,9 +850,9 @@ app.get('/api/riset/daftar/tim/list-tim',  (req, res) => {
 
 // - pml by tim
 app.get('/api/riset/daftar/tim/pmlbytim/:id_tim', (req, res) => {
-    const id_tim = req.params.id_tim;
-    client.query(
-        `
+  const id_tim = req.params.id_tim;
+  client.query(
+    `
         SELECT
             timpencacah.*,
             posisi_pcl.*,
@@ -859,22 +866,23 @@ app.get('/api/riset/daftar/tim/pmlbytim/:id_tim', (req, res) => {
             mahasiswa ON mahasiswa.nim = timpencacah.nim_pml
         WHERE
             timpencacah.id_tim = $1
-        `,[id_tim],
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+        `,
+    [id_tim],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
 
 // - ppl by tim
 app.get('/api/riset/daftar/tim/pplbytim/:id_tim', (req, res) => {
-    const id_tim = req.params.id_tim;
-    client.query(
-        `
+  const id_tim = req.params.id_tim;
+  client.query(
+    `
         SELECT
             timpencacah.*,
             posisi_pcl.*,
@@ -889,17 +897,17 @@ app.get('/api/riset/daftar/tim/pplbytim/:id_tim', (req, res) => {
         WHERE
             mahasiswa.id_tim = $1
             AND timpencacah.nama_tim IS NULL
-        `,[id_tim],
-        (err, result) => {
-            if (!err) {
-                res.send(result.rows);
-            } else {
-                console.log(err.message);
-            }
-        }
-    );
+        `,
+    [id_tim],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
 });
-
 
 // Endpoint for Monitoring PCL
 app.get('/api/monitoring-pcl',  (req, res) => {
@@ -932,3 +940,7 @@ app.get('/api/monitoring-pcl',  (req, res) => {
 });
 
 // Endpoint for Profile
+app.get('/api/profile', validateToken, (req, res) => {
+  user = req.user.user;
+  res.json(user);
+});
