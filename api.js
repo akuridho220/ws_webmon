@@ -42,7 +42,7 @@ function validateToken(req, res, next) {
 
 // Endpoint here
 // ENDPOINT FOR DASHBOARD
-app.get('/api/dashboard/total-listing', validateToken, (req, res) => {
+app.get('/api/dashboard/total-listing', (req, res) => {
   client.query(
     `
         SELECT
@@ -63,23 +63,30 @@ app.get('/api/dashboard/total-listing', validateToken, (req, res) => {
 // ENDPOINT FOR RISET
 // Daftar Listing
 // - bloksensus
-app.get('/api/riset/daftar/listing/bs', validateToken, (req, res) => {
+app.get('/api/riset/daftar/listing/bs', (req, res) => {
   client.query(
     `
-        SELECT
-            rumahtangga.no_bs AS kode_bs,
-            MIN(posisi_pcl.nim) AS nim,
-            MIN(mahasiswa.nama) AS nama_pcl,
-            COUNT(*) AS jumlah_listing
-        FROM
-            rumahtangga
-        LEFT JOIN bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
-        LEFT JOIN posisi_pcl ON posisi_pcl.nim = bloksensus.nim_pencacah
-        LEFT JOIN mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
-        GROUP BY
-            rumahtangga.no_bs
-        ORDER BY
-            rumahtangga.no_bs DESC
+    SELECT
+      rumahtangga.no_bs AS kode_bs,
+      MIN(mahasiswa.nim) AS nim,
+      MIN(mahasiswa.nama) AS nama_pcl,
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      bloksensus.id_kel,
+      COUNT(*) AS jumlah_listing
+    FROM
+      rumahtangga
+    LEFT JOIN bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
+    LEFT JOIN mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
+    GROUP BY
+      rumahtangga.no_bs,
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      bloksensus.id_kel
+    ORDER BY
+      rumahtangga.no_bs ASC
         `,
     (err, result) => {
       if (!err) {
@@ -92,23 +99,30 @@ app.get('/api/riset/daftar/listing/bs', validateToken, (req, res) => {
 });
 
 // - desa/kelurahan
-app.get('/api/riset/daftar/listing/desa', validateToken, (req, res) => {
+app.get('/api/riset/daftar/listing/desa', (req, res) => {
   client.query(
     `
-        SELECT
-            MIN(rumahtangga.no_bs) AS kode_bs,
-            bloksensus.id_kelurahan AS kode_kelurahan,
-            MIN(kelurahan.nama_kelurahan) AS nama_desa,
-            COUNT(*) AS jumlah_listing
-        FROM
-            rumahtangga
-        LEFT JOIN bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
-        LEFT JOIN kelurahan ON kelurahan.id_kelurahan = bloksensus.id_kelurahan
-        GROUP BY
-            bloksensus.id_kelurahan
-        ORDER BY
-            bloksensus.id_kelurahan DESC
-        `,
+    SELECT
+      MIN(rumahtangga.no_bs) AS kode_bs,
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      bloksensus.id_kel,
+      kelurahan.nama_kel,
+      COUNT(*) AS jumlah_listing
+    FROM
+      rumahtangga
+    LEFT JOIN bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
+    LEFT JOIN kelurahan ON bloksensus.id_kel = kelurahan.id_kel AND bloksensus.id_kec = kelurahan.id_kec AND bloksensus.id_kab = kelurahan.id_kab
+    GROUP BY
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      bloksensus.id_kel,
+      kelurahan.nama_kel
+    ORDER BY
+      kelurahan.nama_kel ASC
+    `,
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -119,23 +133,28 @@ app.get('/api/riset/daftar/listing/desa', validateToken, (req, res) => {
   );
 });
 // - kacamatan
-app.get('/api/riset/daftar/listing/kec', validateToken, (req, res) => {
+app.get('/api/riset/daftar/listing/kec',  (req, res) => {
   client.query(
     `
-        SELECT
-            MIN(rumahtangga.no_bs) AS kode_bs,
-            bloksensus.id_kec AS kode_kecamatan,
-            MIN(kecamatan.nama_kec) AS nama_kecamatan,
-            COUNT(*) AS jumlah_listing
-        FROM
-            rumahtangga
-        LEFT JOIN bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
-        LEFT JOIN kecamatan ON kecamatan.id_kec = bloksensus.id_kec
-        GROUP BY
-            bloksensus.id_kec
-        ORDER BY
-            bloksensus.id_kec DESC
-        `,
+    SELECT
+      MIN(rumahtangga.no_bs) AS kode_bs,
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      kecamatan.nama_kec,
+      COUNT(*) AS jumlah_listing
+    FROM
+      rumahtangga
+    LEFT JOIN bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
+    LEFT JOIN kecamatan ON bloksensus.id_kec = kecamatan.id_kec AND bloksensus.id_kab = kecamatan.id_kab
+    GROUP BY
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      kecamatan.nama_kec
+    ORDER BY
+      kecamatan.nama_kec ASC
+    `,
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -147,23 +166,25 @@ app.get('/api/riset/daftar/listing/kec', validateToken, (req, res) => {
 });
 
 // - kabupaten kota
-app.get('/api/riset/daftar/listing/kab', validateToken, (req, res) => {
+app.get('/api/riset/daftar/listing/kab',  (req, res) => {
   client.query(
     `
-        SELECT
-            MIN(rumahtangga.no_bs) AS kode_bs,
-            bloksensus.id_kab AS kode_kabupaten,
-            MIN(kabupaten.nama_kab) AS nama_kabupaten,
-            COUNT(*) AS jumlah_listing
-        FROM
-            rumahtangga
-        LEFT JOIN bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
-        LEFT JOIN kabupaten ON kabupaten.id_kab = bloksensus.id_kab
-        GROUP BY
-            bloksensus.id_kab
-        ORDER BY
-            bloksensus.id_kab DESC
-        `,
+    SELECT
+      MIN(rumahtangga.no_bs) AS kode_bs,
+      bloksensus.id_prov,
+	  kabupaten.id_kab,
+        MIN(kabupaten.nama_kab) AS nama_kabupaten,
+        COUNT(*) AS jumlah_listing
+    FROM
+      rumahtangga
+    LEFT JOIN bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
+    LEFT JOIN kabupaten ON kabupaten.id_kab = bloksensus.id_kab
+    GROUP BY
+      bloksensus.id_prov,
+      kabupaten.id_kab
+	  ORDER BY 
+		  kabupaten.nama_kab ASC
+    `,
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -175,34 +196,35 @@ app.get('/api/riset/daftar/listing/kab', validateToken, (req, res) => {
 });
 
 // - keseluruhan
-//Detail Listing
-// - bloksensus
-// - desa
-// - kecamatan
-// - kabupaten
 
 // Daftar Sampel
 // - bloksensus
-app.get('/api/riset/daftar/sampel/bs', validateToken, (req, res) => {
+app.get('/api/riset/daftar/sampel/bs',  (req, res) => {
   client.query(
     `
-        SELECT
-            datast.no_bs AS kode_bs,
-            MIN(datast.kode_ruta) AS kode_ruta,
-            MIN(posisi_pcl.nim) AS nim,
-            MIN(mahasiswa.nama) AS nama_pcl,
-            COUNT(*) AS jumlah_sampel
-        FROM
-            datast
-        LEFT JOIN rumahtangga ON rumahtangga.kode_ruta = datast.kode_ruta
-        LEFT JOIN bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
-        LEFT JOIN posisi_pcl ON posisi_pcl.nim = bloksensus.nim_pencacah
-        LEFT JOIN mahasiswa ON posisi_pcl.nim = mahasiswa.nim
-        GROUP BY
-            kode_bs
-        ORDER BY
-            kode_bs DESC
-        `,
+    SELECT
+      datast.no_bs AS kode_bs,
+      MIN(datast.kode_ruta) AS kode_ruta,
+      MIN(mahasiswa.nim) AS nim,
+      MIN(mahasiswa.nama) AS nama_pcl,
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      bloksensus.id_kel,
+      COUNT(*) AS jumlah_sampel
+    FROM
+      datast
+    LEFT JOIN bloksensus ON bloksensus.no_bs = datast.no_bs
+    LEFT JOIN mahasiswa ON bloksensus.nim_pencacah = mahasiswa.nim
+    GROUP BY
+      kode_bs,
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      bloksensus.id_kel
+    ORDER BY
+      kode_bs ASC
+    `,
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -214,27 +236,30 @@ app.get('/api/riset/daftar/sampel/bs', validateToken, (req, res) => {
 });
 
 // - kecamatan
-app.get('/api/riset/daftar/sampel/kec', validateToken, (req, res) => {
+app.get('/api/riset/daftar/sampel/kec',  (req, res) => {
   client.query(
     `
-        SELECT
-            MIN(datast.no_bs) AS kode_bs,
-            kecamatan.id_kec AS kode_kecamatan,
-            MIN(kecamatan.nama_kec) AS nama_kecamatan,
-            COUNT(*) AS jumlah_sampel
-        FROM
-            datast
-        LEFT JOIN
-            rumahtangga ON rumahtangga.kode_ruta = datast.kode_ruta
-        LEFT JOIN
-            bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
-        LEFT JOIN
-            kecamatan ON kecamatan.id_kec = bloksensus.id_kec
-        GROUP BY
-            kecamatan.id_kec
-        ORDER BY
-            kecamatan.id_kec DESC
-        `,
+    SELECT
+      MIN(datast.no_bs) AS kode_bs,
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+    bloksensus.id_kec,
+      MIN(kecamatan.nama_kec) AS nama_kec,
+      COUNT(*) AS jumlah_sampel
+    FROM
+      datast
+    LEFT JOIN
+      bloksensus ON bloksensus.no_bs = datast.no_bs
+    LEFT JOIN
+      kecamatan ON kecamatan.id_kec = bloksensus.id_kec AND kecamatan.id_kab = bloksensus.id_kab
+    GROUP BY
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+    bloksensus.id_kec,
+      kecamatan.nama_kec
+    ORDER BY
+      kecamatan.nama_kec ASC
+    `,
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -246,27 +271,28 @@ app.get('/api/riset/daftar/sampel/kec', validateToken, (req, res) => {
 });
 
 // - kabupaten
-app.get('/api/riset/daftar/sampel/kab', validateToken, (req, res) => {
+app.get('/api/riset/daftar/sampel/kab',  (req, res) => {
   client.query(
     `
-        SELECT
-            MIN(datast.no_bs) AS kode_bs,
-            kabupaten.id_kab AS kode_kabupaten,
-            MIN(kabupaten.nama_kab) AS nama_kabupaten,
-            COUNT(*) AS jumlah_sampel
-        FROM
-            datast
-        LEFT JOIN
-            rumahtangga ON rumahtangga.kode_ruta = datast.kode_ruta
-        LEFT JOIN
-            bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
-        LEFT JOIN
-            kabupaten ON kabupaten.id_kab = bloksensus.id_kab
-        GROUP BY
-            kabupaten.id_kab
-        ORDER BY
-            kabupaten.id_kab DESC
-        `,
+    SELECT
+      MIN(datast.no_bs) AS kode_bs,
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      MIN(kabupaten.nama_kab) AS nama_kab,
+      COUNT(*) AS jumlah_sampel
+    FROM
+      datast
+    LEFT JOIN
+      bloksensus ON bloksensus.no_bs = datast.no_bs
+    LEFT JOIN
+      kabupaten ON kabupaten.id_kab = bloksensus.id_kab
+    GROUP BY
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      kabupaten.nama_kab
+    ORDER BY
+      kabupaten.nama_kab ASC
+    `,
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -278,27 +304,32 @@ app.get('/api/riset/daftar/sampel/kab', validateToken, (req, res) => {
 });
 
 // - desa / kelurahan
-app.get('/api/riset/daftar/sampel/desa', validateToken, (req, res) => {
+app.get('/api/riset/daftar/sampel/desa',  (req, res) => {
   client.query(
     `
-        SELECT
-            MIN(datast.no_bs) AS kode_bs,
-            kelurahan.id_kelurahan AS kode_kelurahan,
-            MIN(kelurahan.nama_kelurahan) AS nama_kelurahan,
-            COUNT(*) AS jumlah_sampel
-        FROM
-            datast
-        LEFT JOIN
-            rumahtangga ON rumahtangga.kode_ruta = datast.kode_ruta
-        LEFT JOIN
-            bloksensus ON bloksensus.no_bs = rumahtangga.no_bs
-        LEFT JOIN
-            kelurahan ON kelurahan.id_kelurahan = bloksensus.id_kelurahan
-        GROUP BY
-            kelurahan.id_kelurahan
-        ORDER BY
-            kelurahan.id_kelurahan DESC
-        `,
+    SELECT
+      MIN(datast.no_bs) AS kode_bs,
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+    bloksensus.id_kec,
+    bloksensus.id_kel,
+      MIN(kelurahan.nama_kel) AS nama_kel,
+      COUNT(*) AS jumlah_sampel
+    FROM
+      datast
+    LEFT JOIN
+      bloksensus ON bloksensus.no_bs = datast.no_bs
+    LEFT JOIN
+      kelurahan ON kelurahan.id_kel = bloksensus.id_kel AND kelurahan.id_kec = bloksensus.id_kec AND kelurahan.id_kab = bloksensus.id_kab
+    GROUP BY
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+    bloksensus.id_kec,
+    bloksensus.id_kel,
+      kelurahan.nama_kel
+    ORDER BY
+      kelurahan.nama_kel ASC
+    `,
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -309,16 +340,415 @@ app.get('/api/riset/daftar/sampel/desa', validateToken, (req, res) => {
   );
 });
 
+// Detail Listing
+// - kabupaten
+app.get('/api/riset/daftar/listing/kab/detail/:id',  (req, res) => {
+  const id = req.params.id;
+  const id_kab = id.slice(2, 5);
+  client.query(
+    `
+    SELECT
+      rumahtangga.kode_ruta AS kode_ruta,
+      rumahtangga.no_bs AS kode_bs,
+      rumahtangga.no_urut_ruta AS no_urut_ruta,
+      rumahtangga.nama_krt,
+      rumahtangga.lat AS lat,
+      rumahtangga.long AS long,
+      bloksensus.nim_pencacah AS nim,
+      bloksensus.id_prov AS id_prov,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
+      mahasiswa.nama AS nama_ppl,
+      keluarga.no_bg_fisik AS no_bf,
+      keluarga.no_bg_sensus AS no_bs,
+      keluarga.no_urut_klg_egb AS kode_egb,
+      keluarga.alamat AS alamat
+    FROM
+      rumahtangga
+    LEFT JOIN
+      bloksensus ON rumahtangga.no_bs = bloksensus.no_bs
+    LEFT JOIN
+      mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
+    LEFT JOIN
+      "keluarga-ruta" ON rumahtangga.kode_ruta = "keluarga-ruta".kode_ruta
+    LEFT JOIN
+      keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
+    WHERE
+      bloksensus.id_kab = $1
+    `,[id_kab],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// - kecamatan
+app.get('/api/riset/daftar/listing/kec/detail/:id',  (req, res) => {
+  const id = req.params.id;
+  const id_kab = id.slice(2, 5);
+  const id_kec = id.slice(5, 8);
+
+  client.query(
+    `
+    SELECT
+      rumahtangga.kode_ruta AS kode_ruta,
+      rumahtangga.no_bs AS kode_bs,
+      rumahtangga.no_urut_ruta AS no_urut_ruta,
+      rumahtangga.nama_krt,
+      rumahtangga.lat AS lat,
+      rumahtangga.long AS long,
+      bloksensus.nim_pencacah AS nim,
+      bloksensus.id_prov AS id_prov,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
+      mahasiswa.nama AS nama_ppl,
+      keluarga.no_bg_fisik AS no_bf,
+      keluarga.no_bg_sensus AS no_bs,
+      keluarga.no_urut_klg_egb AS kode_egb,
+      keluarga.alamat AS alamat
+    FROM
+      rumahtangga
+    LEFT JOIN
+      bloksensus ON rumahtangga.no_bs = bloksensus.no_bs
+    LEFT JOIN
+      mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
+    LEFT JOIN
+      "keluarga-ruta" ON rumahtangga.kode_ruta = "keluarga-ruta".kode_ruta
+    LEFT JOIN
+      keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
+    WHERE
+      bloksensus.id_kab = $1 AND bloksensus.id_kec = $2
+    `,[id_kab, id_kec],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// - desa/kelurahan
+app.get('/api/riset/daftar/listing/desa/detail/:id',  (req, res) => {
+  const id = req.params.id;
+  const id_kab = id.slice(2, 5);
+  const id_kec = id.slice(5, 8);
+  const id_kel = id.slice(8, 11);
+
+  client.query(
+    `
+    SELECT
+      rumahtangga.kode_ruta AS kode_ruta,
+      rumahtangga.no_bs AS kode_bs,
+      rumahtangga.no_urut_ruta AS no_urut_ruta,
+      rumahtangga.nama_krt,
+      rumahtangga.lat AS lat,
+      rumahtangga.long AS long,
+      bloksensus.nim_pencacah AS nim,
+      bloksensus.id_prov AS id_prov,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
+      mahasiswa.nama AS nama_ppl,
+      keluarga.no_bg_fisik AS no_bf,
+      keluarga.no_bg_sensus AS no_bs,
+      keluarga.no_urut_klg_egb AS kode_egb,
+      keluarga.alamat AS alamat
+    FROM
+      rumahtangga
+    LEFT JOIN
+      bloksensus ON rumahtangga.no_bs = bloksensus.no_bs
+    LEFT JOIN
+      mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
+    LEFT JOIN
+      "keluarga-ruta" ON rumahtangga.kode_ruta = "keluarga-ruta".kode_ruta
+    LEFT JOIN
+      keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
+    WHERE
+      bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3
+    `,[id_kab, id_kec, id_kel],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// - bloksensus
+app.get('/api/riset/daftar/listing/bs/detail/:id',  (req, res) => {
+  const id = req.params.id;
+  const id_kab = id.slice(2, 5);
+  const id_kec = id.slice(5, 8);
+  const id_kel = id.slice(8, 11);
+  const kode_bs = id.slice(11, 15);
+
+  client.query(
+    `
+    SELECT
+      rumahtangga.kode_ruta AS kode_ruta,
+      rumahtangga.no_bs AS kode_bs,
+      rumahtangga.no_urut_ruta AS no_urut_ruta,
+      rumahtangga.nama_krt,
+      rumahtangga.lat AS lat,
+      rumahtangga.long AS long,
+      bloksensus.nim_pencacah AS nim,
+      bloksensus.id_prov AS id_prov,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
+      mahasiswa.nama AS nama_ppl,
+      keluarga.no_bg_fisik AS no_bf,
+      keluarga.no_bg_sensus AS no_bs,
+      keluarga.no_urut_klg_egb AS kode_egb,
+      keluarga.alamat AS alamat
+    FROM
+      rumahtangga
+    LEFT JOIN
+      bloksensus ON rumahtangga.no_bs = bloksensus.no_bs
+    LEFT JOIN
+      mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
+    LEFT JOIN
+      "keluarga-ruta" ON rumahtangga.kode_ruta = "keluarga-ruta".kode_ruta
+    LEFT JOIN
+      keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
+    WHERE
+      bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3 AND bloksensus.no_bs = $4
+    `,[id_kab, id_kec, id_kel, kode_bs],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+
+// Detail Sampel
+// - kabupaten
+app.get('/api/riset/daftar/sampel/kab/detail/:id',  (req, res) => {
+  const id = req.params.id;
+  const id_kab = id.slice(2, 5);
+  client.query(
+    `
+    SELECT
+      datast.kode_ruta AS kode_ruta,
+      datast.no_bs AS kode_bs,
+      datast.status AS status_cacah,
+      rumahtangga.no_urut_ruta AS no_urut_ruta,
+      rumahtangga.nama_krt,
+      rumahtangga.lat AS lat,
+      rumahtangga.long AS long,
+      bloksensus.nim_pencacah AS nim,
+      bloksensus.id_prov AS id_prov,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
+      mahasiswa.nama AS nama_ppl,
+      keluarga.no_bg_fisik AS no_bf,
+      keluarga.no_bg_sensus AS no_bs,
+      keluarga.no_urut_klg_egb AS kode_egb,
+      keluarga.alamat AS alamat
+    FROM
+      datast
+    LEFT JOIN
+      rumahtangga ON datast.kode_ruta = rumahtangga.kode_ruta
+    LEFT JOIN
+      bloksensus ON rumahtangga.no_bs = bloksensus.no_bs
+    LEFT JOIN
+      mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
+    LEFT JOIN
+      "keluarga-ruta" ON rumahtangga.kode_ruta = "keluarga-ruta".kode_ruta
+    LEFT JOIN
+      keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
+    WHERE
+      bloksensus.id_kab = $1
+    `,[id_kab],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// - kecamatan
+app.get('/api/riset/daftar/sampel/kec/detail/:id',  (req, res) => {
+  const id = req.params.id;
+  const id_kab = id.slice(2, 5);
+  const id_kec = id.slice(5, 8);
+  client.query(
+    `
+    SELECT
+      datast.kode_ruta AS kode_ruta,
+      datast.no_bs AS kode_bs,
+      datast.status AS status_cacah,
+      rumahtangga.no_urut_ruta AS no_urut_ruta,
+      rumahtangga.nama_krt,
+      rumahtangga.lat AS lat,
+      rumahtangga.long AS long,
+      bloksensus.nim_pencacah AS nim,
+      bloksensus.id_prov AS id_prov,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
+      mahasiswa.nama AS nama_ppl,
+      keluarga.no_bg_fisik AS no_bf,
+      keluarga.no_bg_sensus AS no_bs,
+      keluarga.no_urut_klg_egb AS kode_egb,
+      keluarga.alamat AS alamat
+    FROM
+      datast
+    LEFT JOIN
+      rumahtangga ON datast.kode_ruta = rumahtangga.kode_ruta
+    LEFT JOIN
+      bloksensus ON rumahtangga.no_bs = bloksensus.no_bs
+    LEFT JOIN
+      mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
+    LEFT JOIN
+      "keluarga-ruta" ON rumahtangga.kode_ruta = "keluarga-ruta".kode_ruta
+    LEFT JOIN
+      keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
+    WHERE
+      bloksensus.id_kab = $1 AND bloksensus.id_kec = $2
+    `,[id_kab, id_kec],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// - desa/kelurahan
+app.get('/api/riset/daftar/sampel/desa/detail/:id',  (req, res) => {
+  const id = req.params.id;
+  const id_kab = id.slice(2, 5);
+  const id_kec = id.slice(5, 8);
+  const id_kel = id.slice(8, 11);
+  client.query(
+    `
+    SELECT
+      datast.kode_ruta AS kode_ruta,
+      datast.no_bs AS kode_bs,
+      datast.status AS status_cacah,
+      rumahtangga.no_urut_ruta AS no_urut_ruta,
+      rumahtangga.nama_krt,
+      rumahtangga.lat AS lat,
+      rumahtangga.long AS long,
+      bloksensus.nim_pencacah AS nim,
+      bloksensus.id_prov AS id_prov,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
+      mahasiswa.nama AS nama_ppl,
+      keluarga.no_bg_fisik AS no_bf,
+      keluarga.no_bg_sensus AS no_bs,
+      keluarga.no_urut_klg_egb AS kode_egb,
+      keluarga.alamat AS alamat
+    FROM
+      datast
+    LEFT JOIN
+      rumahtangga ON datast.kode_ruta = rumahtangga.kode_ruta
+    LEFT JOIN
+      bloksensus ON rumahtangga.no_bs = bloksensus.no_bs
+    LEFT JOIN
+      mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
+    LEFT JOIN
+      "keluarga-ruta" ON rumahtangga.kode_ruta = "keluarga-ruta".kode_ruta
+    LEFT JOIN
+      keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
+    WHERE
+      bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3
+    `,[id_kab, id_kec, id_kel],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// - blok sensus
+app.get('/api/riset/daftar/sampel/bs/detail/:id',  (req, res) => {
+  const id = req.params.id;
+  const id_kab = id.slice(2, 5);
+  const id_kec = id.slice(5, 8);
+  const id_kel = id.slice(8, 11);
+  const kode_bs = id.slice(11, 15);
+  client.query(
+    `
+    SELECT
+      datast.kode_ruta AS kode_ruta,
+      datast.no_bs AS kode_bs,
+      datast.status AS status_cacah,
+      rumahtangga.no_urut_ruta AS no_urut_ruta,
+      rumahtangga.nama_krt,
+      rumahtangga.lat AS lat,
+      rumahtangga.long AS long,
+      bloksensus.nim_pencacah AS nim,
+      bloksensus.id_prov AS id_prov,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
+      mahasiswa.nama AS nama_ppl,
+      keluarga.no_bg_fisik AS no_bf,
+      keluarga.no_bg_sensus AS no_bs,
+      keluarga.no_urut_klg_egb AS kode_egb,
+      keluarga.alamat AS alamat
+    FROM
+      datast
+    LEFT JOIN
+      rumahtangga ON datast.kode_ruta = rumahtangga.kode_ruta
+    LEFT JOIN
+      bloksensus ON rumahtangga.no_bs = bloksensus.no_bs
+    LEFT JOIN
+      mahasiswa ON mahasiswa.nim = bloksensus.nim_pencacah
+    LEFT JOIN
+      "keluarga-ruta" ON rumahtangga.kode_ruta = "keluarga-ruta".kode_ruta
+    LEFT JOIN
+      keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
+    WHERE
+      bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3 AND bloksensus.no_bs = $4
+    `,[id_kab, id_kec, id_kel, kode_bs],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+
 // Daftar Pertim
 // Listing
-app.get('/api/riset/daftar/tim/listing', validateToken, (req, res) => {
+app.get('/api/riset/daftar/tim/listing',  (req, res) => {
   client.query(
     `
         SELECT
             rumahtangga.no_bs AS kode_bs,
             posisi_pcl.nim AS nim,
             mahasiswa.nama AS nama,
-			mahasiswa.id_tim AS id_tim,
+			      mahasiswa.id_tim AS id_tim,
             COUNT(*) as jumlah_listing
         FROM
             rumahtangga
@@ -347,7 +777,7 @@ app.get('/api/riset/daftar/tim/listing', validateToken, (req, res) => {
 });
 
 // Sampel
-app.get('/api/riset/daftar/tim/sampel', validateToken, (req, res) => {
+app.get('/api/riset/daftar/tim/sampel',  (req, res) => {
   client.query(
     `
         SELECT
@@ -385,7 +815,7 @@ app.get('/api/riset/daftar/tim/sampel', validateToken, (req, res) => {
 });
 
 // - list tim
-app.get('/api/riset/daftar/tim/list-tim', validateToken, (req, res) => {
+app.get('/api/riset/daftar/tim/list-tim',  (req, res) => {
   client.query(
     `
         SELECT
@@ -472,7 +902,7 @@ app.get('/api/riset/daftar/tim/pplbytim/:id_tim', (req, res) => {
 
 
 // Endpoint for Monitoring PCL
-app.get('/api/monitoring-pcl', validateToken, (req, res) => {
+app.get('/api/monitoring-pcl',  (req, res) => {
   client.query(
     `
         SELECT 
