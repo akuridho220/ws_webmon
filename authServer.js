@@ -11,7 +11,7 @@ const port = process.env.TOKEN_SERVER_PORT;
 const { authClient } = require('./connection');
 
 app.listen(port, () => {
-  console.log(`Authorization Server running on ${port}...`);
+  console.log(`Authorization Server running on ${port}`);
 });
 
 authClient.connect((err) => {
@@ -69,7 +69,6 @@ app.post('/api/login', async (req, res) => {
 
 // Access Token
 function generateAccessToken(user) {
-  console.log(user);
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
 }
 
