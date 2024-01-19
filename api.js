@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { activeAccessTokens } = require('./authServer');
 const express = require('express');
+const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -140,7 +141,7 @@ app.get('/api/riset/daftar/listing/desa', (req, res) => {
   );
 });
 // - kacamatan
-app.get('/api/riset/daftar/listing/kec',  (req, res) => {
+app.get('/api/riset/daftar/listing/kec', (req, res) => {
   client.query(
     `
     SELECT
@@ -173,7 +174,7 @@ app.get('/api/riset/daftar/listing/kec',  (req, res) => {
 });
 
 // - kabupaten kota
-app.get('/api/riset/daftar/listing/kab',  (req, res) => {
+app.get('/api/riset/daftar/listing/kab', (req, res) => {
   client.query(
     `
     SELECT
@@ -206,7 +207,7 @@ app.get('/api/riset/daftar/listing/kab',  (req, res) => {
 
 // Daftar Sampel
 // - bloksensus
-app.get('/api/riset/daftar/sampel/bs',  (req, res) => {
+app.get('/api/riset/daftar/sampel/bs', (req, res) => {
   client.query(
     `
     SELECT
@@ -243,7 +244,7 @@ app.get('/api/riset/daftar/sampel/bs',  (req, res) => {
 });
 
 // - kecamatan
-app.get('/api/riset/daftar/sampel/kec',  (req, res) => {
+app.get('/api/riset/daftar/sampel/kec', (req, res) => {
   client.query(
     `
     SELECT
@@ -278,7 +279,7 @@ app.get('/api/riset/daftar/sampel/kec',  (req, res) => {
 });
 
 // - kabupaten
-app.get('/api/riset/daftar/sampel/kab',  (req, res) => {
+app.get('/api/riset/daftar/sampel/kab', (req, res) => {
   client.query(
     `
     SELECT
@@ -311,7 +312,7 @@ app.get('/api/riset/daftar/sampel/kab',  (req, res) => {
 });
 
 // - desa / kelurahan
-app.get('/api/riset/daftar/sampel/desa',  (req, res) => {
+app.get('/api/riset/daftar/sampel/desa', (req, res) => {
   client.query(
     `
     SELECT
@@ -349,7 +350,7 @@ app.get('/api/riset/daftar/sampel/desa',  (req, res) => {
 
 // Detail Listing
 // - kabupaten
-app.get('/api/riset/daftar/listing/kab/detail/:id',  (req, res) => {
+app.get('/api/riset/daftar/listing/kab/detail/:id', (req, res) => {
   const id = req.params.id;
   const id_kab = id.slice(2, 5);
   client.query(
@@ -383,7 +384,8 @@ app.get('/api/riset/daftar/listing/kab/detail/:id',  (req, res) => {
       keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1
-    `,[id_kab],
+    `,
+    [id_kab],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -395,7 +397,7 @@ app.get('/api/riset/daftar/listing/kab/detail/:id',  (req, res) => {
 });
 
 // - kecamatan
-app.get('/api/riset/daftar/listing/kec/detail/:id',  (req, res) => {
+app.get('/api/riset/daftar/listing/kec/detail/:id', (req, res) => {
   const id = req.params.id;
   const id_kab = id.slice(2, 5);
   const id_kec = id.slice(5, 8);
@@ -431,7 +433,8 @@ app.get('/api/riset/daftar/listing/kec/detail/:id',  (req, res) => {
       keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2
-    `,[id_kab, id_kec],
+    `,
+    [id_kab, id_kec],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -443,7 +446,7 @@ app.get('/api/riset/daftar/listing/kec/detail/:id',  (req, res) => {
 });
 
 // - desa/kelurahan
-app.get('/api/riset/daftar/listing/desa/detail/:id',  (req, res) => {
+app.get('/api/riset/daftar/listing/desa/detail/:id', (req, res) => {
   const id = req.params.id;
   const id_kab = id.slice(2, 5);
   const id_kec = id.slice(5, 8);
@@ -480,7 +483,8 @@ app.get('/api/riset/daftar/listing/desa/detail/:id',  (req, res) => {
       keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3
-    `,[id_kab, id_kec, id_kel],
+    `,
+    [id_kab, id_kec, id_kel],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -492,7 +496,7 @@ app.get('/api/riset/daftar/listing/desa/detail/:id',  (req, res) => {
 });
 
 // - bloksensus
-app.get('/api/riset/daftar/listing/bs/detail/:id',  (req, res) => {
+app.get('/api/riset/daftar/listing/bs/detail/:id', (req, res) => {
   const id = req.params.id;
   const id_kab = id.slice(2, 5);
   const id_kec = id.slice(5, 8);
@@ -530,7 +534,8 @@ app.get('/api/riset/daftar/listing/bs/detail/:id',  (req, res) => {
       keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3 AND bloksensus.no_bs = $4
-    `,[id_kab, id_kec, id_kel, kode_bs],
+    `,
+    [id_kab, id_kec, id_kel, kode_bs],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -541,10 +546,9 @@ app.get('/api/riset/daftar/listing/bs/detail/:id',  (req, res) => {
   );
 });
 
-
 // Detail Sampel
 // - kabupaten
-app.get('/api/riset/daftar/sampel/kab/detail/:id',  (req, res) => {
+app.get('/api/riset/daftar/sampel/kab/detail/:id', (req, res) => {
   const id = req.params.id;
   const id_kab = id.slice(2, 5);
   client.query(
@@ -581,7 +585,8 @@ app.get('/api/riset/daftar/sampel/kab/detail/:id',  (req, res) => {
       keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1
-    `,[id_kab],
+    `,
+    [id_kab],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -593,7 +598,7 @@ app.get('/api/riset/daftar/sampel/kab/detail/:id',  (req, res) => {
 });
 
 // - kecamatan
-app.get('/api/riset/daftar/sampel/kec/detail/:id',  (req, res) => {
+app.get('/api/riset/daftar/sampel/kec/detail/:id', (req, res) => {
   const id = req.params.id;
   const id_kab = id.slice(2, 5);
   const id_kec = id.slice(5, 8);
@@ -631,7 +636,8 @@ app.get('/api/riset/daftar/sampel/kec/detail/:id',  (req, res) => {
       keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2
-    `,[id_kab, id_kec],
+    `,
+    [id_kab, id_kec],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -643,7 +649,7 @@ app.get('/api/riset/daftar/sampel/kec/detail/:id',  (req, res) => {
 });
 
 // - desa/kelurahan
-app.get('/api/riset/daftar/sampel/desa/detail/:id',  (req, res) => {
+app.get('/api/riset/daftar/sampel/desa/detail/:id', (req, res) => {
   const id = req.params.id;
   const id_kab = id.slice(2, 5);
   const id_kec = id.slice(5, 8);
@@ -682,7 +688,8 @@ app.get('/api/riset/daftar/sampel/desa/detail/:id',  (req, res) => {
       keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3
-    `,[id_kab, id_kec, id_kel],
+    `,
+    [id_kab, id_kec, id_kel],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -694,7 +701,7 @@ app.get('/api/riset/daftar/sampel/desa/detail/:id',  (req, res) => {
 });
 
 // - blok sensus
-app.get('/api/riset/daftar/sampel/bs/detail/:id',  (req, res) => {
+app.get('/api/riset/daftar/sampel/bs/detail/:id', (req, res) => {
   const id = req.params.id;
   const id_kab = id.slice(2, 5);
   const id_kec = id.slice(5, 8);
@@ -734,7 +741,8 @@ app.get('/api/riset/daftar/sampel/bs/detail/:id',  (req, res) => {
       keluarga ON "keluarga-ruta".kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3 AND bloksensus.no_bs = $4
-    `,[id_kab, id_kec, id_kel, kode_bs],
+    `,
+    [id_kab, id_kec, id_kel, kode_bs],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -745,10 +753,9 @@ app.get('/api/riset/daftar/sampel/bs/detail/:id',  (req, res) => {
   );
 });
 
-
 // Daftar Pertim
 // Listing
-app.get('/api/riset/daftar/tim/listing',  (req, res) => {
+app.get('/api/riset/daftar/tim/listing', (req, res) => {
   client.query(
     `
         SELECT
@@ -784,7 +791,7 @@ app.get('/api/riset/daftar/tim/listing',  (req, res) => {
 });
 
 // Sampel
-app.get('/api/riset/daftar/tim/sampel',  (req, res) => {
+app.get('/api/riset/daftar/tim/sampel', (req, res) => {
   client.query(
     `
         SELECT
@@ -822,7 +829,7 @@ app.get('/api/riset/daftar/tim/sampel',  (req, res) => {
 });
 
 // - list tim
-app.get('/api/riset/daftar/tim/list-tim',  (req, res) => {
+app.get('/api/riset/daftar/tim/list-tim', (req, res) => {
   client.query(
     `
         SELECT
@@ -910,7 +917,7 @@ app.get('/api/riset/daftar/tim/pplbytim/:id_tim', (req, res) => {
 });
 
 // Endpoint for Monitoring PCL
-app.get('/api/monitoring-pcl',  (req, res) => {
+app.get('/api/monitoring-pcl', (req, res) => {
   client.query(
     `
         SELECT 
@@ -942,5 +949,51 @@ app.get('/api/monitoring-pcl',  (req, res) => {
 // Endpoint for Profile
 app.get('/api/profile', validateToken, (req, res) => {
   user = req.user.user;
+
+  user = {
+    name: user.name,
+    email: user.email,
+    jenis: user.jenis,
+    jabatan: user.jabatan,
+  };
+
+  if (!user) {
+    res.status(403).send('Token invalid or User not Found');
+  }
   res.json(user);
+});
+
+app.put('/api/updatePassword', validateToken, async (req, res) => {
+  try {
+    const thisuser = req.user.user;
+    console.log(thisuser);
+    const { oldPassword, newPassword } = req.body;
+    const email = thisuser.email;
+    // Check if the user exists
+    const userQuery = `SELECT * FROM users WHERE email = $1`;
+    const userResult = await authClient.query(userQuery, [email]);
+    const user = userResult.rows[0];
+    console.log('lolos');
+
+    if (!user) {
+      return res.status(404).send('User tidak terdaftar dalam database');
+    }
+
+    // Check if the old password matches
+    if (await bcrypt.compare(oldPassword, user.password)) {
+      // Hash the new password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update the user's password
+      const updateQuery = `UPDATE users SET password = $1 WHERE email = $2`;
+      await authClient.query(updateQuery, [hashedNewPassword, email]);
+
+      res.status(200).send('Password updated successfully');
+    } else {
+      res.status(401).send('Old password is incorrect');
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error updating password');
+  }
 });

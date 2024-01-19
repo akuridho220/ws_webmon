@@ -23,18 +23,18 @@ authClient.connect((err) => {
 });
 
 // REGISTER A USER
-app.post('/api/createUser', async (req, res) => {
-  try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const query = 'INSERT INTO users (name, password, email, jenis, jabatan) VALUES ($1, $2, $3, $4, $5)';
-    const values = [req.body.name, hashedPassword, req.body.email, req.body.jenis, req.body.jabatan];
-    await authClient.query(query, values);
-    res.status(201).send('User created successfully');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error creating user');
-  }
-});
+// app.post('/api/createUser', async (req, res) => {
+//   try {
+//     const hashedPassword = await bcrypt.hash(req.body.password, 10);
+//     const query = 'INSERT INTO users (name, password, email, jenis, jabatan) VALUES ($1, $2, $3, $4, $5)';
+//     const values = [req.body.name, hashedPassword, req.body.email, req.body.jenis, req.body.jabatan];
+//     await authClient.query(query, values);
+//     res.status(201).send('User created successfully');
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send('Error creating user');
+//   }
+// });
 
 // Declare an array to store active access tokens
 
@@ -72,7 +72,7 @@ function generateAccessToken(user) {
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
 }
 
-app.delete('/api/logout', (req, res) => {
+app.delete('/api/logout', async (req, res) => {
   const tokenToInvalidate = req.body.token;
   if (!tokenToInvalidate) {
     return res.status(400).send('Token not provided');
