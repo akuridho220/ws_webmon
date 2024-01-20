@@ -32,8 +32,6 @@ function validateToken(req, res, next) {
   const token = authHeader.split(' ')[1];
   //the request header contains the token "Bearer <token>", split the string and use the second value in the split array.
   if (token == null) res.sendStatus(400).send('Token not present');
-  // Check if the token is in the list of active tokens
-  console.log(activeAccessTokens);
   if (!activeAccessTokens.includes(token)) {
     return res.status(403).send('Token not active');
   }
@@ -988,9 +986,9 @@ app.put('/api/updatePassword', validateToken, async (req, res) => {
       const updateQuery = `UPDATE users SET password = $1 WHERE email = $2`;
       await authClient.query(updateQuery, [hashedNewPassword, email]);
 
-      res.status(200).send('Password updated successfully');
+      res.status(200).send('Password berhasil diubah');
     } else {
-      res.status(401).send('Old password is incorrect');
+      res.status(401).send('Password lama tidak sesuai');
     }
   } catch (error) {
     console.error(error);
