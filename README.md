@@ -12,13 +12,20 @@ git clone https://git.stis.ac.id/fosil-spd-pkl/63/web-service-webmon.git
 npm install
 ```
 
-3. Buat file connection.js, copy paste isi file connection.js.example ke connection.js
+3. jalankan command berikut jika ingin pakai nodemon
 
-4. Edit file connection.js dengan mengisikan password postgres kalian dan juga nama database. (import databasenya terlebih dahulu di DBvearer atau PGadmin )
+```
+npm install -g nodemon
+```
 
-5. copy .env.example ubah jadi .env saja
 
-6. run
+4. Buat file connection.js, copy paste isi file connection.js.example ke connection.js
+
+5. Edit file connection.js dengan mengisikan password postgres kalian dan juga nama database. (import databasenya terlebih dahulu di DBvearer atau PGadmin )
+
+6. copy .env.example ubah jadi .env saja
+
+7. run
 
 ```sh
 node generate.js
@@ -26,7 +33,7 @@ node generate.js
 
 untuk mengambil accesTokenSecret dan RefreshTokenSecret untuk dicopykan ke .env
 
-7. run
+8. run
 
 ```
 node api.js
