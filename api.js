@@ -964,14 +964,12 @@ app.get('/api/profile', validateToken, (req, res) => {
 app.put('/api/updatePassword', validateToken, async (req, res) => {
   try {
     const thisuser = req.user.user;
-    console.log(thisuser);
     const { oldPassword, newPassword } = req.body;
     const email = thisuser.email;
     // Check if the user exists
     const userQuery = `SELECT * FROM users WHERE email = $1`;
     const userResult = await authClient.query(userQuery, [email]);
     const user = userResult.rows[0];
-    console.log('lolos');
 
     if (!user) {
       return res.status(404).send('User tidak terdaftar dalam database');
