@@ -18,7 +18,6 @@ npm install
 npm install -g nodemon
 ```
 
-
 4. Buat file connection.js, copy paste isi file connection.js.example ke connection.js
 
 5. Edit file connection.js dengan mengisikan password postgres kalian dan juga nama database. (import databasenya terlebih dahulu di DBvearer atau PGadmin )
@@ -33,7 +32,15 @@ node generate.js
 
 untuk mengambil accesTokenSecret dan RefreshTokenSecret untuk dicopykan ke .env
 
-8. run
+8. Untuk seed database jalankan command
+
+```
+npm run seed
+```
+
+lalu ubah `users.example.csv` menjadi `users.csv`. Isikan data users.csv berdasarkan akun yang mau dibuat
+
+9. run
 
 ```
 node api.js
