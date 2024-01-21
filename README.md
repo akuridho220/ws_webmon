@@ -32,13 +32,16 @@ node generate.js
 
 untuk mengambil accesTokenSecret dan RefreshTokenSecret untuk dicopykan ke .env
 
-8. Untuk seed database jalankan command
+8. Untuk seed database webmon khusus
+ ubah `users.example.csv` menjadi `users.csv`. Isikan data users.csv berdasarkan akun yang mau dibuat
+
+lalu jalankan command berikut 
 
 ```
 npm run seed
 ```
 
-lalu ubah `users.example.csv` menjadi `users.csv`. Isikan data users.csv berdasarkan akun yang mau dibuat
+
 
 9. run
 
