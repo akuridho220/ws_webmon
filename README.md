@@ -37,7 +37,7 @@ node generate.js
 untuk mengambil `accesTokenSecret` dan `RefreshTokenSecret` untuk dicopykan ke `.env`
 
 8. Untuk seed database webmon khusus
- ubah `users.example.csv` menjadi `users.csv`. Isikan data users.csv berdasarkan akun yang mau dibuat
+ copy `users.example.csv` lalu ubah namanya menjadi `users.csv`. Isikan data `users.csv` berdasarkan akun yang mau dibuat
 
 lalu jalankan command berikut 
 
