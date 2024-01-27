@@ -112,7 +112,11 @@ app.put('/api/createPasswordReset', async (req, res) => {
     try {
       const updateQuery = `UPDATE users SET password_reset_token = $1 WHERE email = $2`;
       await authClient.query(updateQuery, [passwordResetToken, req.body.email]);
-      res.status(200).send('Password reset token berhasil diubah');
+      const data = {
+        message: 'Password reset token berhasil diubah',
+        token: passwordResetToken,
+      };
+      res.status(200).send(data);
     } catch {
       res.status(401).send('Reset token telah diambil harap coba lagi');
     }
@@ -122,6 +126,7 @@ app.put('/api/createPasswordReset', async (req, res) => {
   }
 });
 
+// reset password
 app.put('/api/resetPassword', async (req, res) => {
   try {
     const query = 'SELECT * FROM users WHERE password_reset_token = $1';
