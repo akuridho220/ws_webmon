@@ -22,9 +22,13 @@ npm install -g nodemon
 
 5. Edit file `connection.js` dengan mengisikan password postgres kalian dan juga nama database. (import databasenya terlebih dahulu di DBvearer atau PGadmin )
 
+> struktur database webmon_63 khusus
+> ![Alt text](struktur_database.png)
+> tambahkan constraint unique untuk kolom password_reset_token
+> ![Alt text](constraint.png)
+
 > [!NOTE]  
 > untuk `client` diisikan `database CAPI` sementara untuk `authClient` diisikan `database khusus webmon`.
-
 
 6. copy `.env.example` ubah jadi `.env` saja
 
@@ -37,15 +41,13 @@ node generate.js
 untuk mengambil `accesTokenSecret` dan `RefreshTokenSecret` untuk dicopykan ke `.env`
 
 8. Untuk seed database webmon khusus
- copy `users.example.csv` lalu ubah namanya menjadi `users.csv`. Isikan data `users.csv` berdasarkan akun yang mau dibuat
+   copy `users.example.csv` lalu ubah namanya menjadi `users.csv`. Isikan data `users.csv` berdasarkan akun yang mau dibuat
 
-lalu jalankan command berikut 
+lalu jalankan command berikut
 
 ```
 npm run seed
 ```
-
-
 
 9. run
 
