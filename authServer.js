@@ -216,7 +216,7 @@ app.post('/api/verifyResetToken', async (req, res) => {
     const user = result.rows[0];
 
     if (!user) {
-      return res.status(404).send('Token tidak valid');
+      return res.status(200).send('Token tidak valid');
     }
 
     res.status(200).send('Token valid');
