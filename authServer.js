@@ -7,6 +7,9 @@ const cors = require('cors');
 app.use(express.json());
 app.use(cors());
 
+const axios = require('axios');
+const nodemailer = require('nodemailer');
+
 const port = process.env.TOKEN_SERVER_PORT;
 const { authClient } = require('./connection');
 
@@ -149,5 +152,58 @@ app.put('/api/resetPassword', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Error during password reset');
+  }
+});
+
+const authServer = process.env.AUTH_SERVER;
+const baseUrl = process.env.BASE_URL_APP;
+async function sendEmail(email, resetToken) {
+  try {
+    // Create a nodemailer transporter
+    const transport = nodemailer.createTransport({
+      service: process.env.SERVICE_SMTP,
+      host: process.env.HOST_SMTP,
+      port: process.env.PORT_SMTP,
+      secure: true,
+      auth: {
+        user: process.env.USER_SMTP,
+        pass: process.env.PASS_SMTP,
+      },
+    });
+
+    // Send the email
+    const info = await transport.sendMail({
+      from: 'webmon63@stis.ac.id',
+      to: email,
+      subject: 'Password Reset Web Monitoring PKL 63',
+      text: `Click the link below to reset your password: ${baseUrl}reset-password?token=${resetToken}`,
+      html: `<p>Click the link below to reset your password:</p><p><a href="${baseUrl}reset-password?token=${resetToken}">Reset Password</a></p>`,
+    });
+  } catch (error) {
+    throw error; // Propagate the error to be caught by the calling function
+  }
+}
+
+app.post('/api/forgotPassword', async (req, res) => {
+  try {
+    if (req.method === 'POST') {
+      const { email } = req.body;
+
+      console.log('Email:', email);
+
+      // Generate a random reset token
+      const response = await axios.put(`${authServer}CreatePasswordReset`, {
+        email,
+      });
+      const resetToken = response.data.token;
+
+      // Send the email
+      await sendEmail(email, resetToken);
+      res.status(200).json({ message: 'Password reset email sent successfully.' });
+    } else {
+      res.status(405).json({ error: 'Method not allowed' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to process password reset.' });
   }
 });
