@@ -175,9 +175,17 @@ async function sendEmail(email, resetToken) {
     const info = await transport.sendMail({
       from: 'webmon63@stis.ac.id',
       to: email,
-      subject: 'Password Reset Web Monitoring PKL 63',
+      subject: 'Password Reset link untuk Web Monitoring PKL 63 (No reply)',
       text: `Click the link below to reset your password: ${baseUrl}reset-password?token=${resetToken}`,
-      html: `<p>Click the link below to reset your password:</p><p><a href="${baseUrl}reset-password?token=${resetToken}">Reset Password</a></p>`,
+      html: `  <div style="font-family: 'Arial', sans-serif; color: #333; padding: 20px;">
+      <img src="./public/logo-icon.png" alt="Logo" style="max-width: 100px; margin:auto; margin-bottom: 20px;" />
+      <h2 style="color: #951a2e;">Password Reset Web Monitoring PKL 63</h2>
+      <p style="font-size: 16px;">Klik link dibawah ini untuk mereset password akun anda:</p>
+      <p style="font-size: 16px; margin-bottom: 20px;">
+        <a href="${baseUrl}reset-password?token=${resetToken}" style="text-decoration: none; background-color: #c4314e; color: #fff; padding: 10px 20px; border-radius: 5px; display: inline-block;">Reset Password</a>
+      </p>
+      <p style="font-size: 14px; color: #777;">Jika Anda tidak meminta reset password, abaikan email ini.</p>
+    </div>`,
     });
   } catch (error) {
     throw error; // Propagate the error to be caught by the calling function
