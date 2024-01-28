@@ -207,3 +207,21 @@ app.post('/api/forgotPassword', async (req, res) => {
     res.status(500).json({ error: 'Failed to process password reset.' });
   }
 });
+
+app.post('/api/verifyResetToken', async (req, res) => {
+  try {
+    const { token } = req.body;
+    const query = 'SELECT * FROM users WHERE password_reset_token = $1';
+    const result = await authClient.query(query, [token]);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(404).send('Token tidak valid');
+    }
+
+    res.status(200).send('Token valid');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error during verify token');
+  }
+});
