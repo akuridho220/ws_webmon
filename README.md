@@ -23,9 +23,11 @@ npm install -g nodemon
 5. Edit file `connection.js` dengan mengisikan password postgres kalian dan juga nama database. (import databasenya terlebih dahulu di DBvearer atau PGadmin )
 
 > struktur database webmon_63 khusus
-> ![Alt text](struktur_database.png)
-> tambahkan constraint unique untuk kolom password_reset_token
-> ![Alt text](constraint.png)
+> ![Struktur database webmon](struktur_database.png)
+
+> tambahkan `constraint` unique untuk kolom `password_reset_token`. Untuk kolom `password_reset_token` dan `password_reset_at` _nullable_. Kolom lain tidak boleh null
+
+> ![Constraint unique](constraint.png)
 
 > [!NOTE]  
 > untuk `client` diisikan `database CAPI` sementara untuk `authClient` diisikan `database khusus webmon`.
