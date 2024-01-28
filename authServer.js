@@ -196,9 +196,6 @@ app.post('/api/forgotPassword', async (req, res) => {
   try {
     if (req.method === 'POST') {
       const { email } = req.body;
-
-      console.log('Email:', email);
-
       // Generate a random reset token
       const response = await axios.put(`${authServer}CreatePasswordReset`, {
         email,
