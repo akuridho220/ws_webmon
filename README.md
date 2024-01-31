@@ -19,7 +19,7 @@ npm install -g nodemon
 ```
 
 ```
-npm install -g db-migrate
+npm install -g db-migrate db-migrate-pg
 ```
 
 4. Buat file `connection.js`, copy paste isi file `connection.js.example` ke `connection.js`
@@ -46,8 +46,13 @@ node generate.js
 
 untuk mengambil `accesTokenSecret` dan `RefreshTokenSecret` untuk dicopykan ke `.env`
 
-8. Untuk seed database webmon khusus
-   copy `users.example.csv` lalu ubah namanya menjadi `users.csv`. Isikan data `users.csv` berdasarkan akun yang mau dibuat
+8. Untuk migrate tabel database jalankan
+
+```
+db-migrate up
+```
+
+Lalu untuk seed database webmon khusus copy `users.example.csv` lalu ubah namanya menjadi `users.csv`. Isikan data `users.csv` berdasarkan akun yang mau dibuat
 
 lalu jalankan command berikut
 
