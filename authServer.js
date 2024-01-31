@@ -178,7 +178,7 @@ async function sendEmail(email, resetToken) {
       subject: 'Password Reset link untuk Web Monitoring PKL 63 (No reply)',
       text: `Click the link below to reset your password: ${baseUrl}reset-password?token=${resetToken}`,
       html: `  <div style="font-family: 'Arial', sans-serif; color: #333; padding: 20px;">
-      <img src="./public/logo-icon.png" alt="Logo" style="max-width: 100px; margin:auto; margin-bottom: 20px;" />
+      <img src="./logo-icon.png" alt="Logo" style="max-width: 100px; margin:auto; margin-bottom: 20px;" />
       <h2 style="color: #951a2e;">Password Reset Web Monitoring PKL 63</h2>
       <p style="font-size: 16px;">Klik link dibawah ini untuk mereset password akun anda:</p>
       <p style="font-size: 16px; margin-bottom: 20px;">

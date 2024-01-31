@@ -12,10 +12,14 @@ git clone https://git.stis.ac.id/fosil-spd-pkl/63/web-service-webmon.git
 npm install
 ```
 
-3. jalankan command berikut jika ingin pakai nodemon
+3. jalankan command berikut jika ingin pakai nodemon dan db-migrate (untuk migrasi tabel database)
 
 ```
 npm install -g nodemon
+```
+
+```
+npm install -g db-migrate
 ```
 
 4. Buat file `connection.js`, copy paste isi file `connection.js.example` ke `connection.js`
