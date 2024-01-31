@@ -24,14 +24,7 @@ npm install -g db-migrate db-migrate-pg
 
 4. Buat file `connection.js`, copy paste isi file `connection.js.example` ke `connection.js`
 
-5. Edit file `connection.js` dengan mengisikan password postgres kalian dan juga nama database. (import databasenya terlebih dahulu di DBvearer atau PGadmin )
-
-> struktur database webmon_63 khusus
-> ![Struktur database webmon](struktur_database.png)
-
-> tambahkan `constraint` unique untuk kolom `password_reset_token`. Untuk kolom `password_reset_token` dan `password_reset_at` _nullable_. Kolom lain tidak boleh null
-
-> ![Constraint unique](constraint.png)
+5. Edit file `connection.js` dengan mengisikan password postgres kalian dan juga nama database. 
 
 > [!NOTE]  
 > untuk `client` diisikan `database CAPI` sementara untuk `authClient` diisikan `database khusus webmon`.
