@@ -19,7 +19,7 @@ exports.up = function (db, callback) {
     'users',
     {
       id: { type: 'int', primaryKey: true, autoIncrement: true },
-      nama: { type: 'string', notNull: true },
+      name: { type: 'string', notNull: true },
       password: { type: 'string', notNull: true },
       email: { type: 'string', unique: true, notNull: true },
       jenis: { type: 'string', notNull: true },
