@@ -12,6 +12,7 @@ const nodemailer = require('nodemailer');
 
 const port = process.env.TOKEN_SERVER_PORT;
 const { authClient } = require('./connection');
+const e = require('express');
 
 app.listen(port, () => {
   console.log(`Authorization Server running on ${port}`);
@@ -58,7 +59,12 @@ app.post('/api/login', async (req, res) => {
     }
 
     if (await bcrypt.compare(req.body.password, user.password)) {
-      const accessToken = generateAccessToken({ user: user });
+      let accessToken;
+      if (req.body.remember === true) {
+        accessToken = generateAccessToken({ user: user }, 60 * 60 * 24 * 10);
+      } else {
+        accessToken = generateAccessToken({ user: user }, 60 * 60 * 24);
+      }
       activeAccessTokens.push(accessToken);
       res.json({ accessToken });
     } else {
@@ -71,8 +77,9 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Access Token
-function generateAccessToken(user) {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+function generateAccessToken(user, expires) {
+  console.log('expire', expires);
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: expires });
 }
 
 // Password reset token

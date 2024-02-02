@@ -926,7 +926,7 @@ app.get('/api/riset/daftar/tim/pplbytim/:id_tim', (req, res) => {
 });
 
 // Endpoint for Monitoring PCL
-app.get('/api/monitoring-ppl',  (req, res) => {
+app.get('/api/monitoring-ppl', (req, res) => {
   client.query(
     `
         SELECT 
