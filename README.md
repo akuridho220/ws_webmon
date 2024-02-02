@@ -24,12 +24,12 @@ npm install -g db-migrate db-migrate-pg
 
 4. Buat file `connection.js`, copy paste isi file `connection.js.example` ke `connection.js`
 
-5. Edit file `connection.js` dengan mengisikan password postgres kalian dan juga nama database. 
+5. Edit file `connection.js` dengan mengisikan password postgres kalian dan juga nama database.
 
 > [!NOTE]  
 > untuk `client` diisikan `database CAPI` sementara untuk `authClient` diisikan `database khusus webmon`.
 
-6. copy `.env.example` ubah jadi `.env` saja
+6. copy `.env.example` ubah jadi `.env` saja. Ubah bagian `Database` sesuai konfigurasi database kalian
 
 7. run
 
