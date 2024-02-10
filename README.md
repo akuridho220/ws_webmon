@@ -12,27 +12,24 @@ git clone https://git.stis.ac.id/fosil-spd-pkl/63/web-service-webmon.git
 npm install
 ```
 
-3. jalankan command berikut jika ingin pakai nodemon
+3. jalankan command berikut jika ingin pakai nodemon dan db-migrate (untuk migrasi tabel database)
 
 ```
 npm install -g nodemon
 ```
 
+```
+npm install -g db-migrate db-migrate-pg
+```
+
 4. Buat file `connection.js`, copy paste isi file `connection.js.example` ke `connection.js`
 
-5. Edit file `connection.js` dengan mengisikan password postgres kalian dan juga nama database. (import databasenya terlebih dahulu di DBvearer atau PGadmin )
-
-> struktur database webmon_63 khusus
-> ![Struktur database webmon](struktur_database.png)
-
-> tambahkan `constraint` unique untuk kolom `password_reset_token`. Untuk kolom `password_reset_token` dan `password_reset_at` _nullable_. Kolom lain tidak boleh null
-
-> ![Constraint unique](constraint.png)
+5. Edit file `connection.js` dengan mengisikan password postgres kalian dan juga nama database.
 
 > [!NOTE]  
 > untuk `client` diisikan `database CAPI` sementara untuk `authClient` diisikan `database khusus webmon`.
 
-6. copy `.env.example` ubah jadi `.env` saja
+6. copy `.env.example` ubah jadi `.env` saja. Ubah bagian `Database` sesuai konfigurasi database kalian
 
 7. run
 
@@ -42,8 +39,13 @@ node generate.js
 
 untuk mengambil `accesTokenSecret` dan `RefreshTokenSecret` untuk dicopykan ke `.env`
 
-8. Untuk seed database webmon khusus
-   copy `users.example.csv` lalu ubah namanya menjadi `users.csv`. Isikan data `users.csv` berdasarkan akun yang mau dibuat
+8. Untuk migrate tabel database jalankan
+
+```
+db-migrate up
+```
+
+Lalu untuk seed database webmon khusus copy `users.example.csv` lalu ubah namanya menjadi `users.csv`. Isikan data `users.csv` berdasarkan akun yang mau dibuat
 
 lalu jalankan command berikut
 

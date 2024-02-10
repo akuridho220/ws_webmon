@@ -12,6 +12,7 @@ const nodemailer = require('nodemailer');
 
 const port = process.env.TOKEN_SERVER_PORT;
 const { authClient } = require('./connection');
+const e = require('express');
 
 app.listen(port, () => {
   console.log(`Authorization Server running on ${port}`);
@@ -58,7 +59,12 @@ app.post('/api/login', async (req, res) => {
     }
 
     if (await bcrypt.compare(req.body.password, user.password)) {
-      const accessToken = generateAccessToken({ user: user });
+      let accessToken;
+      if (req.body.remember === true) {
+        accessToken = generateAccessToken({ user: user }, 60 * 60 * 24 * 10);
+      } else {
+        accessToken = generateAccessToken({ user: user }, 60 * 60 * 24);
+      }
       activeAccessTokens.push(accessToken);
       res.json({ accessToken });
     } else {
@@ -71,8 +77,9 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Access Token
-function generateAccessToken(user) {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+function generateAccessToken(user, expires) {
+  console.log('expire', expires);
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: expires });
 }
 
 // Password reset token
@@ -178,7 +185,7 @@ async function sendEmail(email, resetToken) {
       subject: 'Password Reset link untuk Web Monitoring PKL 63 (No reply)',
       text: `Click the link below to reset your password: ${baseUrl}reset-password?token=${resetToken}`,
       html: `  <div style="font-family: 'Arial', sans-serif; color: #333; padding: 20px;">
-      <img src="./public/logo-icon.png" alt="Logo" style="max-width: 100px; margin:auto; margin-bottom: 20px;" />
+      <img src="./logo-icon.png" alt="Logo" style="max-width: 100px; margin:auto; margin-bottom: 20px;" />
       <h2 style="color: #951a2e;">Password Reset Web Monitoring PKL 63</h2>
       <p style="font-size: 16px;">Klik link dibawah ini untuk mereset password akun anda:</p>
       <p style="font-size: 16px; margin-bottom: 20px;">
