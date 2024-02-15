@@ -48,14 +48,37 @@ function validateToken(req, res, next) {
 
 // Endpoint here
 // ENDPOINT FOR DASHBOARD
+// Total sampel, listing, eligible
 app.get('/api/dashboard/total-listing', (req, res) => {
   client.query(
     `
         SELECT
-            COUNT(*) AS total_listing
+            COUNT(*) AS total_listing,
+            (SELECT MAX(no_urut_ruta_egb) FROM rumahtangga) AS total_eligible,
+            (SELECT COUNT(*) FROM datast) AS total_sampel
         FROM
             rumahtangga
         `,
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows[0]);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// Progress
+app.get('/api/dashboard/progress', (req, res) => {
+  client.query(
+    `
+      SELECT
+          COUNT(*) AS total,
+          SUM(CASE WHEN status = '1' THEN 1 ELSE 0 END) AS tercacah
+      FROM
+          datast
+    `,
     (err, result) => {
       if (!err) {
         res.send(result.rows[0]);
@@ -740,7 +763,8 @@ app.get('/api/riset/daftar/tim/listing/:id_tim', (req, res) => {
       bloksensus.id_tim
     ORDER BY
       jumlah_listing ASC
-        `,[id_tim],
+        `,
+    [id_tim],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -796,7 +820,8 @@ app.get('/api/riset/daftar/tim/sampel/:id_tim', (req, res) => {
       bloksensus.id_tim
     ORDER BY
       jumlah_sampel ASC
-        `,[id_tim],
+        `,
+    [id_tim],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
