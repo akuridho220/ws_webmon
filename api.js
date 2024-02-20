@@ -1083,8 +1083,8 @@ app.get('/api/riset/progres/tim', (req, res) => {
 });
 
 // Detail Progres Tim
-app.get('/api/riset/progres/tim/detail/:id_bs', (req, res) => {
-  const id_bs = req.params.id_bs;
+app.get('/api/riset/progres/tim/detail/:id_tim', (req, res) => {
+  const id_tim = req.params.id_tim;
   client.query(
     `
     SELECT
@@ -1097,13 +1097,13 @@ app.get('/api/riset/progres/tim/detail/:id_bs', (req, res) => {
     LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
     LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
     LEFT JOIN rumahtangga ON datast.kode_ruta = rumahtangga.kode_ruta
-    WHERE datast.id_bs = $1
+    WHERE bloksensus.id_tim = $1
     GROUP BY
       bloksensus.id_tim,
       timpencacah.nama_tim,
       datast.kode_ruta,
       rumahtangga.nama_krt
-    `,[id_bs],
+    `,[id_tim],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -1121,17 +1121,14 @@ app.get('/api/riset/progres/wilayah', (req, res) => {
     SELECT
       datast.id_bs AS id_bs,
       bloksensus.id_tim AS id_tim,
-      timpencacah.nama_tim AS nama_tim,
       COUNT(*) as jumlah_sampel_selesai
     FROM
       datast
     LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
-    LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
     WHERE datast.status = '2'
     GROUP BY
       datast.id_bs,
-      bloksensus.id_tim,
-      timpencacah.nama_tim
+      bloksensus.id_tim
     ORDER BY
       jumlah_sampel_selesai ASC
     `,
@@ -1249,8 +1246,27 @@ app.get('/api/kecamatan/:id_kab', (req, res) => {
   client.query(
     `
     SELECT * FROM Kecamatan
-    WHERE id_kab = $1
+    WHERE id_kab = $1 
     `, [id_kab],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// Desa by kecamatan and kelurahan
+app.get('/api/desa/:id_kab/:id_kec', (req, res) => {
+  const id_kab = req.params.id_kab;
+  const id_kec = req.params.id_kec;
+  client.query(
+    `
+    SELECT * FROM Kelurahan
+    WHERE id_kab = $1 AND id_kec = $2
+    `, [id_kab, id_kec],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
