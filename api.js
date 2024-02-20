@@ -1051,20 +1051,87 @@ app.get('/api/riset/daftar/tim/pplbytim/:id_tim', (req, res) => {
 });
 
 // Progres
+// TIM
 app.get('/api/riset/progres/tim', (req, res) => {
   client.query(
     `
     SELECT
       datast.id_bs AS id_bs,
       bloksensus.id_tim AS id_tim,
+      timpencacah.nama_tim AS nama_tim,
       COUNT(*) as jumlah_sampel_selesai
     FROM
       datast
     LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
-    WHERE datast.status = '1'
+    LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
+    WHERE datast.status = '2'
     GROUP BY
       datast.id_bs,
-      bloksensus.id_tim
+      bloksensus.id_tim,
+      timpencacah.nama_tim
+    ORDER BY
+      jumlah_sampel_selesai ASC
+    `,
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// Detail Progres Tim
+app.get('/api/riset/progres/tim/detail/:id_bs', (req, res) => {
+  const id_bs = req.params.id_bs;
+  client.query(
+    `
+    SELECT
+      datast.*,
+      bloksensus.id_tim AS id_tim,
+      timpencacah.nama_tim AS nama_tim,
+      rumahtangga.nama_krt AS nama_krt
+    FROM
+      datast
+    LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
+    LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
+    LEFT JOIN rumahtangga ON datast.kode_ruta = rumahtangga.kode_ruta
+    WHERE datast.id_bs = $1
+    GROUP BY
+      bloksensus.id_tim,
+      timpencacah.nama_tim,
+      datast.kode_ruta,
+      rumahtangga.nama_krt
+    `,[id_bs],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// Progres Wilayah
+app.get('/api/riset/progres/wilayah', (req, res) => {
+  client.query(
+    `
+    SELECT
+      datast.id_bs AS id_bs,
+      bloksensus.id_tim AS id_tim,
+      timpencacah.nama_tim AS nama_tim,
+      COUNT(*) as jumlah_sampel_selesai
+    FROM
+      datast
+    LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
+    LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
+    WHERE datast.status = '2'
+    GROUP BY
+      datast.id_bs,
+      bloksensus.id_tim,
+      timpencacah.nama_tim
     ORDER BY
       jumlah_sampel_selesai ASC
     `,
