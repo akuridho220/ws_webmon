@@ -78,7 +78,7 @@ app.post('/api/login', async (req, res) => {
 
 // Access Token
 function generateAccessToken(user, expires) {
-  console.log('expire', expires);
+  console.log('user => name: ', user.user.name, ' email: ', user.user.email, 'has login ', '| expire token', expires);
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: expires });
 }
 
