@@ -75,13 +75,38 @@ app.get('/api/dashboard/progress', (req, res) => {
     `
       SELECT
           COUNT(*) AS total,
-          SUM(CASE WHEN status = '1' THEN 1 ELSE 0 END) AS tercacah
+          SUM(CASE WHEN status = '2' THEN 1 ELSE 0 END) AS tercacah
       FROM
           datast
     `,
     (err, result) => {
       if (!err) {
         res.send(result.rows[0]);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// Progress per wilayah
+app.get('/api/dashboard/progress-kab', (req, res) => {
+  client.query(
+    `
+        SELECT
+          k.nama_kab,
+          COALESCE(COUNT(d.id_bs), 0) AS total,
+          COALESCE(SUM(CASE WHEN d.status = '1' THEN 1 ELSE 0 END), 0) AS tercacah
+      FROM
+          kabupaten k
+      LEFT JOIN
+          datast d ON SUBSTRING(d.id_bs FROM 3 FOR 2) = k.id_kab
+      GROUP BY
+          k.nama_kab
+    `,
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
       } else {
         console.log(err.message);
       }
@@ -1108,7 +1133,8 @@ app.get('/api/riset/progres/tim/detail/:id_tim', (req, res) => {
       timpencacah.nama_tim,
       datast.kode_ruta,
       rumahtangga.nama_krt
-    `,[id_tim],
+    `,
+    [id_tim],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -1227,7 +1253,6 @@ app.put('/api/updatePassword', validateToken, async (req, res) => {
   }
 });
 
-
 // Get All Kabupaten
 app.get('/api/kabupaten', (req, res) => {
   client.query(
@@ -1244,7 +1269,6 @@ app.get('/api/kabupaten', (req, res) => {
   );
 });
 
-
 // Kecamatan by kabupaten
 app.get('/api/kecamatan/:id_kab', (req, res) => {
   const id_kab = req.params.id_kab;
@@ -1252,7 +1276,8 @@ app.get('/api/kecamatan/:id_kab', (req, res) => {
     `
     SELECT * FROM Kecamatan
     WHERE id_kab = $1 
-    `, [id_kab],
+    `,
+    [id_kab],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
@@ -1271,7 +1296,8 @@ app.get('/api/desa/:id_kab/:id_kec', (req, res) => {
     `
     SELECT * FROM Kelurahan
     WHERE id_kab = $1 AND id_kec = $2
-    `, [id_kab, id_kec],
+    `,
+    [id_kab, id_kec],
     (err, result) => {
       if (!err) {
         res.send(result.rows);
