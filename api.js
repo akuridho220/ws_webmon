@@ -922,13 +922,16 @@ app.get('/api/riset/daftar/tim/sampel', (req, res) => {
     SELECT
       datast.id_bs AS id_bs,
       bloksensus.id_tim AS id_tim,
+      timpencacah.nama_tim AS nama_tim,
       COUNT(*) as jumlah_sampel
     FROM
       datast
     LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
+    LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
     GROUP BY
       datast.id_bs,
-      bloksensus.id_tim
+      bloksensus.id_tim,
+      timpencacah.nama_tim
     ORDER BY
       jumlah_sampel ASC
         `,
@@ -977,11 +980,13 @@ app.get('/api/riset/daftar/tim/list-tim', (req, res) => {
   client.query(
     `
         SELECT
-            timpencacah.id_tim
+            timpencacah.id_tim,
+            timpencacah.nama_tim
         FROM
             timpencacah
         GROUP BY
-            timpencacah.id_tim
+            timpencacah.id_tim,
+            timpencacah.nama_tim
         ORDER BY
             timpencacah.id_tim ASC
         `,
