@@ -283,13 +283,16 @@ app.get('/api/riset/daftar/sampel/bs', (req, res) => {
     `
     SELECT
       datast.id_bs AS id_bs,
+      timpencacah.nama_tim AS nama_tim,
       MIN(datast.kode_ruta) AS kode_ruta,
       COUNT(*) AS jumlah_sampel
     FROM
       datast
     LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
+    LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
     GROUP BY
-      datast.id_bs
+      datast.id_bs,
+      timpencacah.nama_tim
     ORDER BY
       datast.id_bs ASC
     `,
@@ -311,7 +314,7 @@ app.get('/api/riset/daftar/sampel/kec', (req, res) => {
       MIN(datast.id_bs) AS id_bs,
       bloksensus.id_prov,
       bloksensus.id_kab,
-    bloksensus.id_kec,
+      bloksensus.id_kec,
       MIN(kecamatan.nama_kec) AS nama_kec,
       COUNT(*) AS jumlah_sampel
     FROM
@@ -1258,6 +1261,38 @@ app.get('/api/kabupaten', (req, res) => {
   client.query(
     `
     SELECT * FROM Kabupaten
+    `,
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// Get All Kecamatan
+app.get('/api/kecamatan', (req, res) => {
+  client.query(
+    `
+    SELECT * FROM Kecamatan
+    `,
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// Get All Desa Kelurahan
+app.get('/api/desa', (req, res) => {
+  client.query(
+    `
+    SELECT * FROM Kelurahan
     `,
     (err, result) => {
       if (!err) {
