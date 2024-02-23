@@ -924,14 +924,17 @@ app.get('/api/riset/daftar/tim/listing/:id_tim', (req, res) => {
     SELECT
       rumahtangga.id_bs AS id_bs,
       bloksensus.id_tim AS id_tim,
+      timpencacah.nama_tim AS nama_tim,
       COUNT(*) as jumlah_listing
     FROM
       rumahtangga
     LEFT JOIN bloksensus ON bloksensus.id_bs = rumahtangga.id_bs
+    LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
     WHERE bloksensus.id_tim = $1
     GROUP BY
       rumahtangga.id_bs,
-      bloksensus.id_tim
+      bloksensus.id_tim,
+      timpencacah.nama_tim
     ORDER BY
       jumlah_listing ASC
         `,
