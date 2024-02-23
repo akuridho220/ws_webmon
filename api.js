@@ -1022,7 +1022,7 @@ app.get('/api/riset/daftar/tim/list-tim', (req, res) => {
             timpencacah.id_tim,
             timpencacah.nama_tim
         ORDER BY
-            timpencacah.id_tim ASC
+            timpencacah.nama_tim ASC
         `,
     (err, result) => {
       if (!err) {
@@ -1166,6 +1166,9 @@ app.get('/api/riset/progres/wilayah', (req, res) => {
     SELECT
       datast.id_bs AS id_bs,
       bloksensus.id_tim AS id_tim,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
       COUNT(*) as jumlah_sampel_selesai
     FROM
       datast
@@ -1173,9 +1176,46 @@ app.get('/api/riset/progres/wilayah', (req, res) => {
     WHERE datast.status = '2'
     GROUP BY
       datast.id_bs,
-      bloksensus.id_tim
+      bloksensus.id_tim,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      bloksensus.id_kel
     ORDER BY
       jumlah_sampel_selesai ASC
+    `,
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+app.get('/api/riset/progres/sampel/bs', (req, res) => {
+  client.query(
+    `
+    SELECT
+      datast.id_bs AS id_bs,
+      timpencacah.nama_tim AS nama_tim,
+      bloksensus.id_kab AS id_kab,
+      bloksensus.id_kec AS id_kec,
+      bloksensus.id_kel AS id_kel,
+      MIN(datast.kode_ruta) AS kode_ruta,
+      COUNT(*) AS jumlah_sampel
+    FROM
+      datast
+    LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
+    LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
+    GROUP BY
+      datast.id_bs,
+      timpencacah.nama_tim,
+      bloksensus.id_kab,
+      bloksensus.id_kec,
+      bloksensus.id_kel
+    ORDER BY
+      datast.id_bs ASC
     `,
     (err, result) => {
       if (!err) {
