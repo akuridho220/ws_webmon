@@ -1124,18 +1124,23 @@ app.get('/api/riset/progres/tim/detail/:id_tim', (req, res) => {
       datast.*,
       bloksensus.id_tim AS id_tim,
       timpencacah.nama_tim AS nama_tim,
-      rumahtangga.nama_krt AS nama_krt
+      rumahtangga.nama_krt AS nama_krt,
+      rumahtangga.nim_pencacah AS nim_pencacah,
+      mahasiswa.nama AS nama_pencacah
     FROM
       datast
     LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
     LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
     LEFT JOIN rumahtangga ON datast.kode_ruta = rumahtangga.kode_ruta
+    LEFT JOIN mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
     WHERE bloksensus.id_tim = $1
     GROUP BY
       bloksensus.id_tim,
       timpencacah.nama_tim,
       datast.kode_ruta,
-      rumahtangga.nama_krt
+      rumahtangga.nama_krt,
+      rumahtangga.nim_pencacah,
+      mahasiswa.nama
     `,
     [id_tim],
     (err, result) => {
