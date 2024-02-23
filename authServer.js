@@ -194,6 +194,7 @@ async function sendEmail(email, resetToken) {
     </div>`,
     });
   } catch (error) {
+    console.log(error);
     throw error; // Propagate the error to be caught by the calling function
   }
 }
