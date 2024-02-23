@@ -1208,6 +1208,43 @@ app.get('/api/riset/progres/wilayah', (req, res) => {
   );
 });
 
+//Detail Progres Wilayah
+app.get('/api/riset/progres/wilayah/detail/:id_bs', (req, res) => {
+  const id_bs = req.params.id_bs;
+  client.query(
+    `
+    SELECT
+      datast.*,
+      timpencacah.nama_tim AS nama_tim,
+      rumahtangga.nama_krt AS nama_krt,
+      rumahtangga.nim_pencacah AS nim_pencacah,
+      mahasiswa.nama AS nama_pencacah
+    FROM
+      datast
+    LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
+    LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
+    LEFT JOIN rumahtangga ON datast.kode_ruta = rumahtangga.kode_ruta
+    LEFT JOIN mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
+    WHERE bloksensus.id_bs = $1
+    GROUP BY
+      datast.id_bs,
+      timpencacah.nama_tim,
+      datast.kode_ruta,
+      rumahtangga.nama_krt,
+      rumahtangga.nim_pencacah,
+      mahasiswa.nama
+    `,
+    [id_bs],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
 app.get('/api/riset/progres/sampel/bs', (req, res) => {
   client.query(
     `
