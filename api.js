@@ -52,12 +52,12 @@ function validateToken(req, res, next) {
 app.get('/api/dashboard/total-listing', (req, res) => {
   client.query(
     `
-        SELECT
-            COUNT(*) AS total_listing,
-            (SELECT MAX(no_urut_ruta_egb) FROM rumahtangga) AS total_eligible,
-            (SELECT COUNT(*) FROM datast) AS total_sampel
-        FROM
-            rumahtangga
+    SELECT
+        COUNT(*) AS total_listing,
+        COUNT(CASE WHEN no_urut_ruta_egb IS NOT NULL THEN 1 END) AS total_eligible,
+        (SELECT COUNT(*) FROM datast) AS total_sampel
+    FROM
+        rumahtangga
         `,
     (err, result) => {
       if (!err) {
