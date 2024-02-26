@@ -468,23 +468,27 @@ app.get('/api/riset/daftar/listing/kab/detail/:id', (req, res) => {
   client.query(
     `
     SELECT
-      rumahtangga.kode_ruta AS kode_ruta,
-      rumahtangga.id_bs AS id_bs,
-      rumahtangga.no_urut_ruta AS no_urut_ruta,
-      rumahtangga.no_segmen,
-      rumahtangga.nama_krt,
-      rumahtangga.no_urut_ruta_egb,
-      rumahtangga.lat AS lat,
-      rumahtangga.long AS long,
-      rumahtangga.nim_pencacah AS nim_pencacah,
-      rumahtangga.jml_genz_anak AS jml_genz_anak,
-      rumahtangga.jml_genz_dewasa AS jml_genz_dewasa,
-      bloksensus.id_tim AS id_tim,
-      timpencacah.nama_tim,
-      mahasiswa.nama AS nama,
-      keluarga.no_bg_fisik AS no_bf,
-      keluarga.no_bg_sensus AS no_bs,
-      keluarga.alamat AS alamat
+    rumahtangga.kode_ruta AS kode_ruta,
+    rumahtangga.id_bs AS id_bs,
+    rumahtangga.no_urut_ruta AS no_urut_ruta,
+    rumahtangga.no_segmen,
+    rumahtangga.nama_krt,
+    rumahtangga.no_urut_ruta_egb,
+    rumahtangga.lat AS lat,
+    rumahtangga.long AS long,
+    rumahtangga.nim_pencacah AS nim_pencacah,
+    rumahtangga.jml_genz_anak AS jml_genz_anak,
+    rumahtangga.jml_genz_dewasa AS jml_genz_dewasa,
+    rumahtangga.catatan AS catatan_ruta,
+    MIN(bloksensus.tgl_periksa) AS tgl_periksa,
+    MIN(bloksensus.tgl_listing) AS tgl_listing,
+    bloksensus.id_tim AS id_tim,
+    MIN(bloksensus.catatan) AS catatan_bs,
+    timpencacah.nama_tim,
+    mahasiswa.nama AS nama,
+    MIN(keluarga.no_bg_fisik) AS no_bf,
+    MIN(keluarga.no_bg_sensus) AS no_bs,
+    keluarga.alamat AS alamat
     FROM
       rumahtangga
     LEFT JOIN
@@ -499,7 +503,12 @@ app.get('/api/riset/daftar/listing/kab/detail/:id', (req, res) => {
       keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1
-    `,
+    GROUP BY
+      rumahtangga.kode_ruta,
+      bloksensus.id_tim,
+      timpencacah.nama_tim,
+      mahasiswa.nama,
+      keluarga.alamat`,
     [id_kab],
     (err, result) => {
       if (!err) {
@@ -520,26 +529,27 @@ app.get('/api/riset/daftar/listing/kec/detail/:id', (req, res) => {
   client.query(
     `
     SELECT
-      rumahtangga.kode_ruta AS kode_ruta,
-      rumahtangga.id_bs AS id_bs,
-      rumahtangga.no_urut_ruta AS no_urut_ruta,
-      rumahtangga.no_segmen,
-      rumahtangga.nama_krt,
-      rumahtangga.no_urut_ruta_egb,
-      rumahtangga.lat AS lat,
-      rumahtangga.long AS long,
-      rumahtangga.nim_pencacah AS nim_pencacah,
-      rumahtangga.jml_genz_anak AS jml_genz_anak,
-      rumahtangga.catatan AS catatan_ruta,
-      bloksensus.tgl_periksa AS tgl_periksa,
-      bloksensus.tgl_listing AS tgl_listing,
-      bloksensus.id_tim AS id_tim,
-      bloksensus.catatan AS catatan_bs,
-      timpencacah.nama_tim,
-      mahasiswa.nama AS nama,
-      keluarga.no_bg_fisik AS no_bf,
-      keluarga.no_bg_sensus AS no_bs,
-      keluarga.alamat AS alamat
+    rumahtangga.kode_ruta AS kode_ruta,
+    rumahtangga.id_bs AS id_bs,
+    rumahtangga.no_urut_ruta AS no_urut_ruta,
+    rumahtangga.no_segmen,
+    rumahtangga.nama_krt,
+    rumahtangga.no_urut_ruta_egb,
+    rumahtangga.lat AS lat,
+    rumahtangga.long AS long,
+    rumahtangga.nim_pencacah AS nim_pencacah,
+    rumahtangga.jml_genz_anak AS jml_genz_anak,
+    rumahtangga.jml_genz_dewasa AS jml_genz_dewasa,
+    rumahtangga.catatan AS catatan_ruta,
+    MIN(bloksensus.tgl_periksa) AS tgl_periksa,
+    MIN(bloksensus.tgl_listing) AS tgl_listing,
+    bloksensus.id_tim AS id_tim,
+    MIN(bloksensus.catatan) AS catatan_bs,
+    timpencacah.nama_tim,
+    mahasiswa.nama AS nama,
+    MIN(keluarga.no_bg_fisik) AS no_bf,
+    MIN(keluarga.no_bg_sensus) AS no_bs,
+    keluarga.alamat AS alamat
     FROM
       rumahtangga
     LEFT JOIN
@@ -554,7 +564,12 @@ app.get('/api/riset/daftar/listing/kec/detail/:id', (req, res) => {
       keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2
-    `,
+    GROUP BY
+      rumahtangga.kode_ruta,
+      bloksensus.id_tim,
+      timpencacah.nama_tim,
+      mahasiswa.nama,
+      keluarga.alamat`,
     [id_kab, id_kec],
     (err, result) => {
       if (!err) {
@@ -588,14 +603,14 @@ app.get('/api/riset/daftar/listing/desa/detail/:id', (req, res) => {
       rumahtangga.jml_genz_anak AS jml_genz_anak,
       rumahtangga.jml_genz_dewasa AS jml_genz_dewasa,
       rumahtangga.catatan AS catatan_ruta,
-      bloksensus.tgl_periksa AS tgl_periksa,
-      bloksensus.tgl_listing AS tgl_listing,
+      MIN(bloksensus.tgl_periksa) AS tgl_periksa,
+      MIN(bloksensus.tgl_listing) AS tgl_listing,
       bloksensus.id_tim AS id_tim,
-      bloksensus.catatan AS catatan_bs,
+      MIN(bloksensus.catatan) AS catatan_bs,
       timpencacah.nama_tim,
       mahasiswa.nama AS nama,
-      keluarga.no_bg_fisik AS no_bf,
-      keluarga.no_bg_sensus AS no_bs,
+      MIN(keluarga.no_bg_fisik) AS no_bf,
+      MIN(keluarga.no_bg_sensus) AS no_bs,
       keluarga.alamat AS alamat
     FROM
       rumahtangga
@@ -611,7 +626,12 @@ app.get('/api/riset/daftar/listing/desa/detail/:id', (req, res) => {
       keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3
-    `,
+    GROUP BY
+      rumahtangga.kode_ruta,
+      bloksensus.id_tim,
+      timpencacah.nama_tim,
+      mahasiswa.nama,
+      keluarga.alamat`,
     [id_kab, id_kec, id_kel],
     (err, result) => {
       if (!err) {
@@ -646,14 +666,14 @@ app.get('/api/riset/daftar/listing/bs/detail/:id', (req, res) => {
       rumahtangga.jml_genz_anak AS jml_genz_anak,
       rumahtangga.jml_genz_dewasa AS jml_genz_dewasa,
       rumahtangga.catatan AS catatan_ruta,
-      bloksensus.tgl_periksa AS tgl_periksa,
-      bloksensus.tgl_listing AS tgl_listing,
       bloksensus.id_tim AS id_tim,
-      bloksensus.catatan AS catatan_bs,
+      MIN(bloksensus.tgl_periksa) AS tgl_periksa,
+      MIN(bloksensus.tgl_listing) AS tgl_listing,
+      MIN(bloksensus.catatan) AS catatan_bs,
       timpencacah.nama_tim,
       mahasiswa.nama AS nama,
-      keluarga.no_bg_fisik AS no_bf,
-      keluarga.no_bg_sensus AS no_bs,
+      MIN(keluarga.no_bg_fisik) AS no_bf,
+      MIN(keluarga.no_bg_sensus) AS no_bs,
       keluarga.alamat AS alamat
     FROM
       rumahtangga
@@ -669,7 +689,12 @@ app.get('/api/riset/daftar/listing/bs/detail/:id', (req, res) => {
       keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3 AND bloksensus.no_bs = $4
-    `,
+    GROUP BY
+      rumahtangga.kode_ruta,
+      bloksensus.id_tim,
+      timpencacah.nama_tim,
+      mahasiswa.nama,
+      keluarga.alamat`,
     [id_kab, id_kec, id_kel, kode_bs],
     (err, result) => {
       if (!err) {
@@ -1292,10 +1317,12 @@ app.get('/api/monitoring-ppl', (req, res) => {
             posisi_pcl.time_created AS time_created,
             mahasiswa.nama AS nama,
             mahasiswa.id_tim as id_tim,
-            mahasiswa.no_hp as no_hp
+            mahasiswa.no_hp as no_hp,
+            timpencacah.nama_tim as nama_tim
         FROM 
             posisi_pcl
         LEFT JOIN mahasiswa ON posisi_pcl.nim = mahasiswa.nim
+        LEFT JOIN timpencacah ON mahasiswa.id_tim = timpencacah.id_tim
         WHERE latitude IS NOT NULL
         ORDER BY nama ASC
         `,
