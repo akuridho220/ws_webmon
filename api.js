@@ -96,7 +96,7 @@ app.get('/api/dashboard/progress-kab', (req, res) => {
         SELECT
           k.nama_kab,
           COALESCE(COUNT(d.id_bs), 0) AS total,
-          COALESCE(SUM(CASE WHEN d.status = '1' THEN 1 ELSE 0 END), 0) AS tercacah
+          COALESCE(SUM(CASE WHEN d.status = '2' THEN 1 ELSE 0 END), 0) AS tercacah
       FROM
           kabupaten k
       LEFT JOIN
