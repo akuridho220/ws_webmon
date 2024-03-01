@@ -944,7 +944,7 @@ app.get('/api/riset/daftar/tim/listing', (req, res) => {
       bloksensus.id_tim,
       timpencacah.nama_tim
     ORDER BY
-      jumlah_listing ASC
+      nama_tim ASC
         `,
     (err, result) => {
       if (!err) {
