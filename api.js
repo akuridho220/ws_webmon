@@ -992,7 +992,6 @@ app.get('/api/riset/daftar/tim/sampel', (req, res) => {
   client.query(
     `
     SELECT
-      datast.id_bs AS id_bs,
       bloksensus.id_tim AS id_tim,
       timpencacah.nama_tim AS nama_tim,
       COUNT(*) as jumlah_sampel
@@ -1001,7 +1000,6 @@ app.get('/api/riset/daftar/tim/sampel', (req, res) => {
     LEFT JOIN bloksensus ON bloksensus.id_bs = datast.id_bs
     LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
     GROUP BY
-      datast.id_bs,
       bloksensus.id_tim,
       timpencacah.nama_tim
     ORDER BY
