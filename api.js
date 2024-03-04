@@ -1131,7 +1131,6 @@ app.get('/api/riset/progres/tim', (req, res) => {
   client.query(
     `
     SELECT
-      datast.id_bs AS id_bs,
       bloksensus.id_tim AS id_tim,
       timpencacah.nama_tim AS nama_tim,
       COUNT(*) as jumlah_sampel_selesai
@@ -1141,7 +1140,6 @@ app.get('/api/riset/progres/tim', (req, res) => {
     LEFT JOIN timpencacah ON bloksensus.id_tim = timpencacah.id_tim
     WHERE datast.status = '2'
     GROUP BY
-      datast.id_bs,
       bloksensus.id_tim,
       timpencacah.nama_tim
     ORDER BY
