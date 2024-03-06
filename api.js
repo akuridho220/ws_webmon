@@ -212,15 +212,18 @@ app.get('/api/riset/daftar/listing/kab', (req, res) => {
     `
     SELECT
       MIN(rumahtangga.id_bs) AS id_bs,
-      MIN(kabupaten.nama_kab) AS nama_kabupaten,
+      kabupaten.nama_kab AS nama_kabupaten,
+      bloksensus.id_kab as id_kab,
       COUNT(*) AS jumlah_listing
     FROM
       rumahtangga
     LEFT JOIN bloksensus ON bloksensus.id_bs = rumahtangga.id_bs
     LEFT JOIN kabupaten ON kabupaten.id_kab = bloksensus.id_kab
+    WHERE bloksensus.id_bs NOT LIKE '99%'
     GROUP BY
       bloksensus.id_prov,
-      kabupaten.id_kab
+      bloksensus.id_kab,
+      kabupaten.nama_kab
     ORDER BY 
       kabupaten.nama_kab ASC
     `,
@@ -1457,6 +1460,35 @@ app.get('/api/desa/:id_kab/:id_kec', (req, res) => {
     WHERE id_kab = $1 AND id_kec = $2
     `,
     [id_kab, id_kec],
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+// Progres listing kab
+app.get('/api/progres/listing/kab', (req, res) => {
+  client.query(
+    `
+    SELECT
+      bloksensus.id_kab AS id_kab,
+      kabupaten.nama_kab AS nama_kab,
+      COUNT(*) AS jumlah_listing_selesai
+    FROM
+      bloksensus
+    LEFT JOIN kabupaten ON kabupaten.id_kab = bloksensus.id_kab
+    WHERE bloksensus.status = 'telah-disampel'
+    GROUP BY
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      kabupaten.id_kab
+    ORDER BY 
+      kabupaten.nama_kab ASC
+    `,
     (err, result) => {
       if (!err) {
         res.send(result.rows);
