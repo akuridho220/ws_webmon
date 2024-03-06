@@ -1471,13 +1471,40 @@ app.get('/api/desa/:id_kab/:id_kec', (req, res) => {
 });
 
 // Progres listing kab
-app.get('/api/progres/listing/kab', (req, res) => {
+app.get('/api/progres/listing/kab/all', (req, res) => {
   client.query(
     `
     SELECT
       bloksensus.id_kab AS id_kab,
       kabupaten.nama_kab AS nama_kab,
-      COUNT(*) AS jumlah_listing_selesai
+      COUNT(*) AS jumlah_listing_all
+    FROM
+      bloksensus
+    LEFT JOIN kabupaten ON kabupaten.id_kab = bloksensus.id_kab
+    GROUP BY
+      bloksensus.id_prov,
+      bloksensus.id_kab,
+      kabupaten.id_kab
+    ORDER BY 
+      kabupaten.nama_kab ASC
+    `,
+    (err, result) => {
+      if (!err) {
+        res.send(result.rows);
+      } else {
+        console.log(err.message);
+      }
+    }
+  );
+});
+
+app.get('/api/progres/listing/kab/done', (req, res) => {
+  client.query(
+    `
+    SELECT
+      bloksensus.id_kab AS id_kab,
+      kabupaten.nama_kab AS nama_kab,
+      COUNT(*) AS jumlah_listing_done
     FROM
       bloksensus
     LEFT JOIN kabupaten ON kabupaten.id_kab = bloksensus.id_kab
