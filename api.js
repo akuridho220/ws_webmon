@@ -501,9 +501,7 @@ app.get('/api/riset/daftar/listing/kab/detail/:id', (req, res) => {
     LEFT JOIN
       mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
     LEFT JOIN
-      keluarga_ruta ON rumahtangga.kode_ruta = keluarga_ruta.kode_ruta
-    LEFT JOIN
-      keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg
+      keluarga ON bloksensus.id_bs = keluarga.id_bs
     WHERE
       bloksensus.id_kab = $1
     GROUP BY
@@ -562,9 +560,7 @@ app.get('/api/riset/daftar/listing/kec/detail/:id', (req, res) => {
     LEFT JOIN
       mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
     LEFT JOIN
-      keluarga_ruta ON rumahtangga.kode_ruta = keluarga_ruta.kode_ruta
-    LEFT JOIN
-      keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg
+      keluarga ON bloksensus.id_bs = keluarga.id_bs
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2
     GROUP BY
@@ -624,9 +620,7 @@ app.get('/api/riset/daftar/listing/desa/detail/:id', (req, res) => {
     LEFT JOIN
       mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
     LEFT JOIN
-      keluarga_ruta ON rumahtangga.kode_ruta = keluarga_ruta.kode_ruta
-    LEFT JOIN
-      keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg
+      keluarga ON bloksensus.id_bs = keluarga.id_bs
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3
     GROUP BY
@@ -687,9 +681,7 @@ app.get('/api/riset/daftar/listing/bs/detail/:id', (req, res) => {
     LEFT JOIN
       mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
     LEFT JOIN
-      keluarga_ruta ON rumahtangga.kode_ruta = keluarga_ruta.kode_ruta
-    LEFT JOIN
-      keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg
+      keluarga ON bloksensus.id_bs = keluarga.id_bs
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3 AND bloksensus.no_bs = $4
     GROUP BY
@@ -746,9 +738,7 @@ app.get('/api/riset/daftar/sampel/kab/detail/:id', (req, res) => {
     LEFT JOIN
       mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
     LEFT JOIN
-      keluarga_ruta ON rumahtangga.kode_ruta = keluarga_ruta.kode_ruta
-    LEFT JOIN
-      keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg 
+      keluarga ON bloksensus.id_bs = keluarga.id_bs 
     WHERE
       bloksensus.id_kab = $1
     `,
@@ -800,9 +790,7 @@ app.get('/api/riset/daftar/sampel/kec/detail/:id', (req, res) => {
     LEFT JOIN
       mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
     LEFT JOIN
-      keluarga_ruta ON rumahtangga.kode_ruta = keluarga_ruta.kode_ruta
-    LEFT JOIN
-      keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg 
+      keluarga ON bloksensus.id_bs = keluarga.id_bs 
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2
     `,
@@ -855,9 +843,7 @@ app.get('/api/riset/daftar/sampel/desa/detail/:id', (req, res) => {
     LEFT JOIN
       mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
     LEFT JOIN
-      keluarga_ruta ON rumahtangga.kode_ruta = keluarga_ruta.kode_ruta
-    LEFT JOIN
-      keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg 
+      keluarga ON bloksensus.id_bs = keluarga.id_bs 
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3
     `,
@@ -911,9 +897,7 @@ app.get('/api/riset/daftar/sampel/bs/detail/:id', (req, res) => {
     LEFT JOIN
       mahasiswa ON rumahtangga.nim_pencacah = mahasiswa.nim
     LEFT JOIN
-      keluarga_ruta ON rumahtangga.kode_ruta = keluarga_ruta.kode_ruta
-    LEFT JOIN
-      keluarga ON keluarga_ruta.kode_klg = keluarga.kode_klg 
+      keluarga ON bloksensus.id_bs = keluarga.id_bs 
     WHERE
       bloksensus.id_kab = $1 AND bloksensus.id_kec = $2 AND bloksensus.id_kel = $3 AND bloksensus.no_bs = $4
     `,
